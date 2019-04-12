@@ -1,3 +1,7 @@
+/*
+	THIS SOLUTION DID NOT PASS THE HIDDEN TEST!
+*/
+
 package main
 
 import (
