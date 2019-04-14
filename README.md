@@ -8,6 +8,8 @@ Some `*.in` files will have corrosponding `*.out` files, representing the expect
 
 Sources and all additional materials posted here are released to the public domain.
 
+My contest username is `maowtm`. Feel free to check out my (not so high) rank&hellip;
+
 ## License
 
 <p xmlns:dct="http://purl.org/dc/terms/" xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#">
