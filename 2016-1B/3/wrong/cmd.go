@@ -43,18 +43,27 @@ func test() {
 		}
 		leftMap[t.left] = i
 		rightMap[t.right] = i
+		debug(fmt.Sprintf("%v", t))
 		count++
 	}
-	for _, t := range topics {
+	// The following 16 lines of code is wrong. This is because although the topic added in each loop will not be fake *at
+	// that time*, it can cause pervious topics to become fake. I think my mistake is that I thought of the relationship of
+	// "faked from" is undirected: if the new topic can't be faked from pervious topics, pervious topics can't be faked
+	// from the new topic. This is not true because "faked from" is a 1-to-2 relationship.
+	for i, t := range topics {
 		if _, exist := rightMap[t.right]; exist {
 			continue
 		}
+		debug(fmt.Sprintf("%v", t))
+		rightMap[t.right] = i
 		count++
 	}
-	for _, t := range topics {
+	for i, t := range topics {
 		if _, exist := leftMap[t.left]; exist {
 			continue
 		}
+		debug(fmt.Sprintf("%v", t))
+		leftMap[t.left] = i
 		count++
 	}
 	fmt.Fprintf(stdout, "%d\n", N-count)
