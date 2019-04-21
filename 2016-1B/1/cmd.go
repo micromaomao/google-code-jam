@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 func start() {
+	assert(len(numbers) == 10)
+	assert(len(order) == 10)
 	var t int
 	mustReadLineOfInts(&t)
 	for i := 0; i < t; i++ {
@@ -19,6 +22,7 @@ func start() {
 }
 
 var numbers []string = []string{"ZERO", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE"}
+var order []int = []int{0, 2, 4, 6, 8, 3, 5, 7, 1, 9}
 
 func test() {
 	line := mustReadLine()
@@ -27,12 +31,13 @@ func test() {
 		freqMap[line[i]]++
 	}
 	result := make([]byte, 0)
-	for tryNum := 0; tryNum < 10; tryNum++ {
+	for tryNumIndex := 0; tryNumIndex < len(order); tryNumIndex++ {
 		tmpMap := make(map[byte]int)
 		for k, v := range freqMap {
 			tmpMap[k] = v
 		}
 		ok := true
+		tryNum := order[tryNumIndex]
 		numString := numbers[tryNum]
 		for i := 0; i < len(numString); i++ {
 			l := numString[i]
@@ -48,8 +53,22 @@ func test() {
 		}
 		freqMap = tmpMap
 		result = append(result, strconv.Itoa(tryNum)[0])
-		tryNum--
+		tryNumIndex--
 	}
+	for _, v := range freqMap {
+		if v != 0 {
+			lefts := make([]byte, 0)
+			for k, v := range freqMap {
+				if v != 0 {
+					lefts = append(lefts, k)
+				}
+			}
+			panic(fmt.Errorf("Error: %v left, Current buffer is %v.", string(lefts), string(result)))
+		}
+	}
+	sort.Slice(result, func(i, j int) bool {
+		return result[i] < result[j]
+	})
 	stdout.WriteString(string(result))
 	stdout.WriteByte('\n')
 }

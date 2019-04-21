@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"math/big"
 	"os"
 	"strconv"
 	"strings"
@@ -18,44 +19,153 @@ func start() {
 	}
 }
 
+type CJ struct {
+	C, J []byte
+}
+
+func rank(a, b *CJ) *CJ {
+	if a == nil {
+		return b
+	}
+	if b == nil {
+		return a
+	}
+	aC, ok := big.NewInt(0).SetString(string(a.C), 10)
+	assert(ok)
+	aJ, ok := big.NewInt(0).SetString(string(a.J), 10)
+	assert(ok)
+	bC, ok := big.NewInt(0).SetString(string(b.C), 10)
+	assert(ok)
+	bJ, ok := big.NewInt(0).SetString(string(b.J), 10)
+	assert(ok)
+	diffA := big.NewInt(0).Sub(aC, aJ)
+	diffB := big.NewInt(0).Sub(bC, bJ)
+	cmpAbs := diffA.CmpAbs(diffB)
+	if cmpAbs < 0 {
+		return a
+	} else if cmpAbs > 0 {
+		return b
+	}
+	cmpC := aC.Cmp(bC)
+	if cmpC < 0 {
+		return a
+	} else if cmpC > 0 {
+		return b
+	}
+	if aJ.Cmp(bJ) < 0 {
+		return a
+	} else {
+		return b
+	}
+}
+
+func assumeAndGoOn(pos int, C, J []byte, cmp int8) *CJ {
+	nC := make([]byte, len(C))
+	nJ := make([]byte, len(J))
+	copy(nC, C)
+	copy(nJ, J)
+	C = nC
+	J = nJ
+	N := len(C)
+	if cmp == 0 {
+		for ; pos < N; pos++ {
+			if C[pos] == '?' && J[pos] == '?' {
+				C[pos] = '0'
+				J[pos] = '0'
+			} else if C[pos] == '?' && J[pos] != '?' {
+				C[pos] = J[pos]
+			} else if C[pos] != '?' && J[pos] == '?' {
+				J[pos] = C[pos]
+			}
+		}
+		return &CJ{C, J}
+	} else if cmp < 0 {
+		for ; pos < N; pos++ {
+			if C[pos] == '?' {
+				C[pos] = '9'
+			}
+			if J[pos] == '?' {
+				J[pos] = '0'
+			}
+		}
+		return &CJ{C, J}
+	} else {
+		for ; pos < N; pos++ {
+			if C[pos] == '?' {
+				C[pos] = '0'
+			}
+			if J[pos] == '?' {
+				J[pos] = '9'
+			}
+		}
+		return &CJ{C, J}
+	}
+}
+
 func test() {
 	line := strings.Split(mustReadLine(), " ")
 	assert(len(line) == 2)
 	C := []byte(line[0])
 	J := []byte(line[1])
 	assert(len(C) == len(J))
-	for i := 0; i < len(C); i++ {
-		c := C[i]
-		j := J[i]
-		if c == '?' {
-			if j == '?' {
-				if i == 0 {
-					C[i] = '0'
-					J[i] = '0'
-				} else {
-					cPrefix := string(C[0:i])
-					jPrefix := string(J[0:i])
-					if cPrefix < jPrefix {
-						C[i] = '9'
-						J[i] = '0'
-					} else if cPrefix > jPrefix {
-						C[i] = '0'
-						J[i] = '9'
-					} else {
-						C[i] = '0'
-						J[i] = '0'
-					}
-				}
-			} else {
-				C[i] = j
-			}
-		} else if j == '?' {
-			J[i] = c
+	N := len(C)
+	var best *CJ = nil
+	notEqual := false
+	for i := 0; i < N; i++ {
+		if C[i] == J[i] && C[i] != '?' {
+			continue
 		}
+		if C[i] != '?' && J[i] != '?' {
+			notEqual = true
+			cmp := int8(0)
+			if C[i] < J[i] {
+				cmp = -1
+			} else if C[i] > J[i] {
+				cmp = 1
+			}
+			best = rank(best, assumeAndGoOn(i+1, C, J, cmp))
+			break
+		} else if C[i] != '?' && J[i] == '?' {
+			if C[i] > '0' {
+				J[i] = C[i] - 1
+				best = rank(best, assumeAndGoOn(i+1, C, J, 1))
+			}
+			if C[i] < '9' {
+				J[i] = C[i] + 1
+				best = rank(best, assumeAndGoOn(i+1, C, J, -1))
+			}
+			J[i] = C[i]
+			continue
+		} else if C[i] == '?' && J[i] != '?' {
+			if J[i] > '0' {
+				C[i] = J[i] - 1
+				best = rank(best, assumeAndGoOn(i+1, C, J, -1))
+			}
+			if J[i] < '9' {
+				C[i] = J[i] + 1
+				best = rank(best, assumeAndGoOn(i+1, C, J, 1))
+			}
+			C[i] = J[i]
+			continue
+		} else if C[i] == '?' && J[i] == '?' {
+			C[i] = '1'
+			J[i] = '0'
+			best = rank(best, assumeAndGoOn(i+1, C, J, 1))
+			C[i] = '0'
+			J[i] = '1'
+			best = rank(best, assumeAndGoOn(i+1, C, J, -1))
+			C[i] = '0'
+			J[i] = '0'
+			continue
+		}
+		panic("Uncovered case!")
 	}
-	stdout.Write(C)
+	if !notEqual {
+		best = rank(best, &CJ{C, J})
+	}
+	stdout.Write(best.C)
 	stdout.WriteByte(' ')
-	stdout.Write(J)
+	stdout.Write(best.J)
 	stdout.WriteByte('\n')
 }
 
