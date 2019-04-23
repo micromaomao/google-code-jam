@@ -1,4 +1,3 @@
-// Only works for small
 package main
 
 import (
@@ -34,6 +33,14 @@ func test() []byte {
 	nY := Y
 	nB := B
 	if O > 0 {
+		if B == O && N == O*2 {
+			rep := make([]byte, N)
+			for i := 0; i < N; i += 2 {
+				rep[i] = 'B'
+				rep[i+1] = 'O'
+			}
+			return rep
+		}
 		if B < O+1 {
 			return nil
 		}
@@ -51,6 +58,14 @@ func test() []byte {
 		nB = B + 1
 	}
 	if G > 0 {
+		if R == G && N == G*2 {
+			rep := make([]byte, N)
+			for i := 0; i < N; i += 2 {
+				rep[i] = 'R'
+				rep[i+1] = 'G'
+			}
+			return rep
+		}
 		if R < G+1 {
 			return nil
 		}
@@ -68,6 +83,14 @@ func test() []byte {
 		nR = R + 1
 	}
 	if V > 0 {
+		if Y == V && N == V*2 {
+			rep := make([]byte, N)
+			for i := 0; i < N; i += 2 {
+				rep[i] = 'Y'
+				rep[i+1] = 'V'
+			}
+			return rep
+		}
 		if Y < V+1 {
 			return nil
 		}
