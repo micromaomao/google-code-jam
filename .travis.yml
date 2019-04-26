@@ -1,0 +1,25 @@
+sudo: no
+dist: stretch
+group: edge
+language: node_js
+node_js:
+  - 10
+
+script:
+  - >
+    git clean -dffxn &&
+    cd pages-generator &&
+    npm install &&
+    ./init.js &&
+    cd .. &&
+    cp -r dist /tmp/dist &&
+    rm -rf * &&
+    cp -r /tmp/dist/* .
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  keep_history: false
+  on:
+    branch: master
