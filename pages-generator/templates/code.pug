@@ -1,0 +1,59 @@
+extends layout
+block head
+  title #{problemName} - Mao's Google Code Jam practice files
+  -if (Object.keys(files).find(x => files[x].highlightRender))
+    link(rel='stylesheet', href=hljsStyle)
+block content
+  a(href=rootDir) Return to problem list
+  h1= problemName
+  mixin showFile(f)
+    - f.displayed = true
+    a.fname(href=f.sourceUrl, title="Open on GitHub", target="_blank")= f.path
+    | :
+    -if (f.path.endsWith('.md') && f.highlightRender)
+      div!= f.highlightRender
+    -else
+      pre
+        -if (f.highlightRender)
+          code.hljs!= f.highlightRender
+        -else
+          code.hljs= f.content
+  -let correctSolutions = solutions.filter(x => x.correct === true)
+  -if (correctSolutions.length > 0)
+    -if (correctSolutions.length === 1)
+      h2 Final solution
+      +showFile(files[correctSolutions[0].cmd])
+    -else
+      h2 Final solutions
+      -for (let sol of correctSolutions)
+        h3 Solution #{sol.no}
+        +showFile(files[sol.cmd])
+  -let wrongSolutions = solutions.filter(x => x.correct === false)
+  -if (wrongSolutions.length > 0)
+    -if (wrongSolutions.length === 1)
+      h2 Wrong solution
+      +showFile(files[wrongSolutions[0].cmd])
+    -else
+      h2 Wrong solutions
+      -for (let sol of wrongSolutions)
+        h3= sol.no
+        +showFile(files[sol.cmd])
+    -if (files['problem.in'])
+      +showFile(files['problem.in'])
+    -if (files['problem.out'])
+      h3 Expected output
+      +showFile(files['problem.out'])
+  -let smallSolutions = solutions.filter(x => x.correct === 'small')
+  -if (smallSolutions[0])
+    h2 Solution that only works for the small input
+    +showFile(files[smallSolutions[0].cmd])
+  -if (files['sample.in'])
+    h2 Sample test cases given in question
+    +showFile(files['sample.in'])
+    -if (files['sample.out'])
+      +showFile(files['sample.out'])
+  -if (Object.keys(files).find(x => !files[x].displayed))
+    h2 Other files
+    -for (let fPath of Object.keys(files))
+      -if (!files[fPath].displayed)
+        +showFile(files[fPath])
