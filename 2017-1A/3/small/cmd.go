@@ -42,40 +42,24 @@ func test() int {
 	// This part calculates the minimum amount of attack and cures needed to defeat the knight, not counting cures.
 	// It is independent of D or Hd.
 	tBA, buff := optimizeBA(Hk, Ad, B)
-	// debug(fmt.Sprintf("tBA = %v", tBA))
+	debug(fmt.Sprintf("tBA = %v", tBA))
 	assert(tBA > buff)
 
 	// Try every possible amount of debuff.
-	// TODO: work out a formula for the curePeriod below, which the analysis didn't give, and ignore all but the first
-	// currentDebuff with the same curePeriod.
 	for currentDebuff <= maxDebuff {
-		// For each amount of debuff, simulate what amount of attacks, buffs and cures is needed, maintaining a global minimum
-		// `best`.
-		// debug(fmt.Sprintf("currentDebuff = %v, currentHealth = %v", currentDebuff, currentHealth))
+		// For each amount of debuff, simulate what amount of attacks, buffs and cures is needed, maintaining a global minimum `best`.
+		debug(fmt.Sprintf("currentDebuff = %v, currentHealth = %v", currentDebuff, currentHealth))
 
 		// This is the cures needed for the attack stage.
 		// Cures needed in the debuff stage are added directly onto currentT.
-		curesNeeded := 0
+		cureNeeded := 0
 		impossible := false
 		lastActionIsCure = false
 		// Once we finish simulating this choice of debuff, we need to restore the health value.
 		healthBeforeBA := currentHealth
 
-		curePeriod := -1 // how many attacks bwtween cures (with initial full health)
-		firstCureI := -1
-
 		// Simulate attacks (adding cures when necessary), except for the last attack, which don't need to be followed by a cure.
 		for i := 0; i < tBA-1; {
-			if curePeriod != -1 {
-				// We don't need to simulate anymore.
-				assert(curePeriod > 0)
-				assert(currentHealth == Hd-attack(Ak, currentDebuff, D))
-				attacksRemaining := tBA - 1 - i - 1 // An additional -1 because this i has already been cured.
-				// I admit that this way of writing thing is not the best approach.
-				curesNeeded += attacksRemaining / curePeriod // Remember: not counting last attack, so cure needed even after attack no. tBA-1
-				break
-			}
-
 			// If we attacked/buffed, than...
 			healthAfterThis := currentHealth - attack(Ak, currentDebuff, D)
 			if healthAfterThis <= 0 {
@@ -85,12 +69,7 @@ func test() int {
 					break
 				} else {
 					lastActionIsCure = true
-					if firstCureI == -1 {
-						firstCureI = i
-					} else if curePeriod == -1 {
-						curePeriod = i - firstCureI
-					}
-					curesNeeded++
+					cureNeeded++
 					currentHealth = Hd - attack(Ak, currentDebuff, D) // Knight will attack us after we cured.
 					if currentHealth < 0 {
 						impossible = true
@@ -127,8 +106,8 @@ func test() int {
 				continue
 			}
 		}
-		thisTurnNumber := currentT + tBA + curesNeeded
-		// debug(fmt.Sprintf("thisTurnNumber = %d", thisTurnNumber))
+		thisTurnNumber := currentT + tBA + cureNeeded
+		debug(fmt.Sprintf("thisTurnNumber = %d", thisTurnNumber))
 		if best > thisTurnNumber || best == -1 {
 			best = thisTurnNumber
 		}
@@ -179,7 +158,7 @@ func optimizeBA(Hk, Ad, B int) (tBA, buff int) {
 		nextB := b + 1 + int(math.Ceil(float64(Hk)/float64(Ad+B*(b+1))))
 		return nextB >= thisB
 	})
-	// debug(fmt.Sprintf("b = %d", b))
+	debug(fmt.Sprintf("b = %d", b))
 	return b + int(math.Ceil(float64(Hk)/float64(Ad+B*b))), b
 }
 
