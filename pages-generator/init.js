@@ -93,7 +93,7 @@ for (let seriesName of dirs) {
         } else if (stat.isFile()) {
           let fileOrigContent = fs.readFileSync(fp, {encoding: null})
           let fileContent = fileOrigContent.toString('utf8')
-          process.stderr.write(`REPLIT-WRITE ${replName} ${fileRelPath}`)
+          process.stderr.write(`REPLIT-WRITE ${replName} ${fileRelPath}\n`)
           await replit.write(fileRelPath, fileContent)
           let highlightRender = null
           if (file.endsWith('.go')) {
