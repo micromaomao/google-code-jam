@@ -10,9 +10,11 @@ block content
     - f.displayed = true
     .filehead
       .fnamecontain
-        a.fname(href=f.sourceUrl, title="Open on GitHub", target="_blank")= f.path
+        a.fname(href=f.downloadUrl, target="_blank")= f.path
         | :
       a.download(href=f.downloadUrl, title="Download original", download=f.path.split('/').slice(-1)[0]) save
+      | &nbsp;&nbsp;&nbsp;
+      a.openongithub(href=f.githubUrl, target="_blank") open on GitHub
     -if (f.path.endsWith('.md') && f.highlightRender)
       div!= f.highlightRender
     -else

@@ -64,6 +64,7 @@ for (let seriesName of dirs) {
       if (e.code !== 'EEXIST') throw e
     }
     let outputFilePath = path.resolve(outputDir, seriesName, problemDir + '.html')
+    let thisDirName = path.dirname(outputFilePath)
     let problemName = `${seriesName} Problem ${'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[parseInt(problemDir)-1]}`
     links.push({
       href: path.relative(outputDir, outputFilePath),
@@ -81,7 +82,8 @@ for (let seriesName of dirs) {
           dirs.push(fileRelPath)
           rec(fp)
         } else if (stat.isFile()) {
-          let fileContent = fs.readFileSync(fp, {encoding: 'utf8'}).toString()
+          let fileOrigContent = fs.readFileSync(fp, {encoding: null})
+          let fileContent = fileOrigContent.toString('utf8')
           let highlightRender = null
           if (file.endsWith('.go')) {
             let boilerPlateStartIndex = fileContent.indexOf('/*********Start boilerplate***********/')
@@ -124,10 +126,19 @@ for (let seriesName of dirs) {
               sanitize: true
             })
           }
+          let emitPath = path.resolve(thisDirName, "files", fileRelPath)
+          let emitDir = path.dirname(emitPath)
+          try {
+            fs.mkdirSync(emitDir)
+          } catch (e) {
+            if (e.code !== 'EEXIST') throw e
+          }
+          process.stderr.write(`CP ${path.relative(outputDir, emitPath)}\n`)
+          fs.writeFileSync(emitPath, fileOrigContent)
           filesObj[fileRelPath] = {
             path: fileRelPath,
-            sourceUrl: 'https://github.com/micromaomao/google-code-jam/blob/master/' + path.relative(projectRoot, fp),
-            downloadUrl: 'https://raw.githubusercontent.com/micromaomao/google-code-jam/master/' + path.relative(projectRoot, fp),
+            githubUrl: 'https://github.com/micromaomao/google-code-jam/blob/master/' + path.relative(projectRoot, fp),
+            downloadUrl: path.relative(thisDirName, emitPath),
             content: fileContent,
             highlightRender
           }
@@ -135,7 +146,6 @@ for (let seriesName of dirs) {
       }
     }
     rec(dirPath)
-    let thisDirName = path.dirname(outputFilePath)
     let solutions = []
     if (filesObj['cmd.go']) {
       solutions.push({
