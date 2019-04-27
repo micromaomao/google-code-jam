@@ -4,12 +4,15 @@ block head
   -if (Object.keys(files).find(x => files[x].highlightRender))
     link(rel='stylesheet', href=hljsStyle)
 block content
-  a(href=rootDir) Return to problem list
+  a.toroot(href=rootDir) Return to problem list
   h1= problemName
   mixin showFile(f)
     - f.displayed = true
-    a.fname(href=f.sourceUrl, title="Open on GitHub", target="_blank")= f.path
-    | :
+    .filehead
+      .fnamecontain
+        a.fname(href=f.sourceUrl, title="Open on GitHub", target="_blank")= f.path
+        | :
+      a.download(href=f.downloadUrl, title="Download original", download=f.path.split('/').slice(-1)[0]) save
     -if (f.path.endsWith('.md') && f.highlightRender)
       div!= f.highlightRender
     -else

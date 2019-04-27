@@ -41,6 +41,11 @@ let mainStyleSheetPath = path.resolve(outputDir, "commons", "style.css")
 process.stderr.write(`SASS ${path.relative(outputDir, mainStyleSheetPath)}\n`)
 fs.writeFileSync(mainStyleSheetPath, mainStyleSheetContent)
 
+let generalJsContent = fs.readFileSync(path.resolve(__dirname, "templates", "general.js"), {encoding: 'utf8'})
+let generalJsPath = path.resolve(outputDir, "commons", "general.js")
+process.stderr.write(`CP ${path.relative(outputDir, generalJsPath)}\n`)
+fs.writeFileSync(generalJsPath, generalJsContent)
+
 process.chdir(outputDir)
 let series = []
 for (let seriesName of dirs) {
@@ -122,6 +127,7 @@ for (let seriesName of dirs) {
           filesObj[fileRelPath] = {
             path: fileRelPath,
             sourceUrl: 'https://github.com/micromaomao/google-code-jam/blob/master/' + path.relative(projectRoot, fp),
+            downloadUrl: 'https://raw.githubusercontent.com/micromaomao/google-code-jam/master/' + path.relative(projectRoot, fp),
             content: fileContent,
             highlightRender
           }
@@ -163,7 +169,7 @@ for (let seriesName of dirs) {
       })
     }
     let output = codeTemplate({files: filesObj, solutions, problemName, rootDir: path.relative(thisDirName, outputDir), hljsStyle: path.relative(thisDirName, hljsStylePath),
-                                styleSheet: path.relative(thisDirName, mainStyleSheetPath)})
+                                styleSheet: path.relative(thisDirName, mainStyleSheetPath), generalJs: path.relative(thisDirName, generalJsPath)})
     fs.writeFileSync(outputFilePath, output)
     process.stderr.write(`PUG ${path.relative(outputDir, outputFilePath)}\n`)
   }
@@ -173,6 +179,6 @@ for (let seriesName of dirs) {
   })
 }
 
-let indexHtml = indexTemplate({series, styleSheet: path.relative(outputDir, mainStyleSheetPath)})
+let indexHtml = indexTemplate({series, styleSheet: path.relative(outputDir, mainStyleSheetPath), generalJs: path.relative(outputDir, generalJsPath)})
 fs.writeFileSync(path.resolve(outputDir, 'index.html'), indexHtml)
 process.stderr.write(`PUG index.html\n`)
