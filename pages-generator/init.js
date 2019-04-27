@@ -5,11 +5,17 @@ const pug = require('pug')
 const highlight = require('jstransformer')(require('jstransformer-highlight'))
 const sass = require('node-sass')
 const marked = require('marked')
+const ReplitClient = require('repl.it-api')
+let replit = new ReplitClient()
 
 if (process.argv.length !== 2) {
   process.stdout.write("Expected no arguments.\n")
   process.exit(1)
 }
+
+async function main () {
+
+await replit.login(process.env.REPLIT_SID)
 
 let projectRoot = path.resolve(__dirname, "..")
 let outputDir = path.resolve(__dirname, '../dist')
@@ -72,7 +78,10 @@ for (let seriesName of dirs) {
     })
     let filesObj = {}
     let dirs = []
-    function rec(c) {
+    let replName = 'gcj-' + problemName.replace(/ /g, '-')
+    await replit.create('bash')
+    await replit.connect()
+    async function rec(c) {
       let list = fs.readdirSync(c)
       for (let file of list) {
         let fp = path.resolve(c, file)
@@ -80,10 +89,12 @@ for (let seriesName of dirs) {
         let stat = fs.statSync(fp)
         if (stat.isDirectory()) {
           dirs.push(fileRelPath)
-          rec(fp)
+          await rec(fp)
         } else if (stat.isFile()) {
           let fileOrigContent = fs.readFileSync(fp, {encoding: null})
           let fileContent = fileOrigContent.toString('utf8')
+          process.stderr.write(`REPLIT-WRITE ${replName} ${fileRelPath}`)
+          await replit.write(fileRelPath, fileContent)
           let highlightRender = null
           if (file.endsWith('.go')) {
             let boilerPlateStartIndex = fileContent.indexOf('/*********Start boilerplate***********/')
@@ -145,7 +156,7 @@ for (let seriesName of dirs) {
         }
       }
     }
-    rec(dirPath)
+    await rec(dirPath)
     let solutions = []
     if (filesObj['cmd.go']) {
       solutions.push({
@@ -178,7 +189,11 @@ for (let seriesName of dirs) {
         correct: 'small'
       })
     }
-    let output = codeTemplate({files: filesObj, solutions, problemName, rootDir: path.relative(thisDirName, outputDir), hljsStyle: path.relative(thisDirName, hljsStylePath),
+    let mainSh = `go build && ./runner${filesObj['sample.in'] ? ' < sample.in' : ''}\n# Check out files from the sidebar.`
+    await replit.writeMain(mainSh)
+    let replitinfo = replit.getInfo()
+    let output = codeTemplate({files: filesObj, solutions, problemName, replitUrl: replitinfo.url,
+                                rootDir: path.relative(thisDirName, outputDir), hljsStyle: path.relative(thisDirName, hljsStylePath),
                                 styleSheet: path.relative(thisDirName, mainStyleSheetPath), generalJs: path.relative(thisDirName, generalJsPath)})
     fs.writeFileSync(outputFilePath, output)
     process.stderr.write(`PUG ${path.relative(outputDir, outputFilePath)}\n`)
@@ -192,3 +207,12 @@ for (let seriesName of dirs) {
 let indexHtml = indexTemplate({series, styleSheet: path.relative(outputDir, mainStyleSheetPath), generalJs: path.relative(outputDir, generalJsPath)})
 fs.writeFileSync(path.resolve(outputDir, 'index.html'), indexHtml)
 process.stderr.write(`PUG index.html\n`)
+
+}
+
+main().then(() => {
+  process.exit(0)
+}).catch(err => {
+  process.stderr.write(err.toString() + '\n' + err.stack + '\n')
+  process.exit(1)
+})

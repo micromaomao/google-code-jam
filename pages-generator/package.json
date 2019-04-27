@@ -12,6 +12,7 @@
     "jstransformer-highlight": "^2.0.0",
     "marked": "^0.6.2",
     "node-sass": "^4.11.0",
-    "pug": "^2.0.3"
+    "pug": "^2.0.3",
+    "repl.it-api": "^1.2.5"
   }
 }

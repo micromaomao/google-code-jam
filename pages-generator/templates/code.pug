@@ -6,6 +6,8 @@ block head
 block content
   a.toroot(href=rootDir) Return to problem list
   h1= problemName
+  div
+    a(href=replitUrl) Run on repl.it
   mixin showFile(f)
     - f.displayed = true
     .filehead
