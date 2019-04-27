@@ -13,9 +13,9 @@ if (process.argv.length !== 2) {
   process.exit(1)
 }
 
-async function main () {
+let uploadToReplit = false
 
-await replit.login(process.env.REPLIT_SID)
+async function main () {
 
 let projectRoot = path.resolve(__dirname, "..")
 let outputDir = path.resolve(__dirname, '../dist')
@@ -30,6 +30,13 @@ try {
   if (e.code !== 'EEXIST') throw e
 }
 let dirs = fs.readdirSync(projectRoot).filter(name => /^20\d\d-(\d[A-Z]|qual)$/.test(name))
+
+if (fs.readFileSync(path.resolve(projectRoot, '.git', 'HEAD'), {encoding: 'utf8'}).indexOf('master') >= 0) {
+  uploadToReplit = true
+  await replit.login(process.env.REPLIT_SID)
+} else {
+  replit = null
+}
 
 process.chdir(__dirname)
 let codeTemplate = pug.compileFile(path.resolve(__dirname, 'templates', 'code.pug'))
@@ -79,8 +86,10 @@ for (let seriesName of dirs) {
     let filesObj = {}
     let dirs = []
     let replName = 'gcj-' + problemName.replace(/ /g, '-')
-    await replit.create('bash')
-    await replit.connect()
+    if (uploadToReplit) {
+      await replit.create('bash')
+      await replit.connect()
+    }
     async function rec(c) {
       let list = fs.readdirSync(c)
       for (let file of list) {
@@ -93,8 +102,10 @@ for (let seriesName of dirs) {
         } else if (stat.isFile()) {
           let fileOrigContent = fs.readFileSync(fp, {encoding: null})
           let fileContent = fileOrigContent.toString('utf8')
-          process.stderr.write(`REPLIT-WRITE ${replName} ${fileRelPath}\n`)
-          await replit.write(fileRelPath, fileContent)
+          if (uploadToReplit) {
+            process.stderr.write(`REPLIT-WRITE ${replName} ${fileRelPath}\n`)
+            await replit.write(fileRelPath, fileContent)
+          }
           let highlightRender = null
           if (file.endsWith('.go')) {
             let boilerPlateStartIndex = fileContent.indexOf('/*********Start boilerplate***********/')
@@ -189,10 +200,13 @@ for (let seriesName of dirs) {
         correct: 'small'
       })
     }
-    let mainSh = `go build && ./runner${filesObj['sample.in'] ? ' < sample.in' : ''}\n# Check out files from the sidebar.`
-    await replit.writeMain(mainSh)
-    let replitinfo = replit.getInfo()
-    let output = codeTemplate({files: filesObj, solutions, problemName, replitUrl: replitinfo.url,
+    let replitinfo = null
+    if (uploadToReplit) {
+      let mainSh = `go build && ./runner${filesObj['sample.in'] ? ' < sample.in' : ''}\n# Check out files from the sidebar.`
+      await replit.writeMain(mainSh)
+      replitinfo = replit.getInfo()
+    }
+    let output = codeTemplate({files: filesObj, solutions, problemName, replitUrl: replitinfo ? replitinfo.url : null,
                                 rootDir: path.relative(thisDirName, outputDir), hljsStyle: path.relative(thisDirName, hljsStylePath),
                                 styleSheet: path.relative(thisDirName, mainStyleSheetPath), generalJs: path.relative(thisDirName, generalJsPath)})
     fs.writeFileSync(outputFilePath, output)
