@@ -14,7 +14,8 @@ script:
     cd .. &&
     cp -r dist /tmp/dist &&
     rm -rf * &&
-    cp -r /tmp/dist/* .
+    cp -r /tmp/dist/* . &&
+    echo -n codejam.maowtm.org > CNAME
 
 deploy:
   provider: pages
