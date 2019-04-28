@@ -49,6 +49,9 @@ func test() int {
 	// TODO: work out a formula for the curePeriod below, which the analysis didn't give, and ignore all but the first
 	// currentDebuff with the same curePeriod.
 	for currentDebuff <= maxDebuff {
+		if currentDebuff%1e7 == 0 {
+			debug(fmt.Sprintf("%v", currentDebuff))
+		}
 		// For each amount of debuff, simulate what amount of attacks, buffs and cures is needed, maintaining a global minimum
 		// `best`.
 		// debug(fmt.Sprintf("currentDebuff = %v, currentHealth = %v", currentDebuff, currentHealth))
