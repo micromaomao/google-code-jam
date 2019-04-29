@@ -31,7 +31,7 @@ try {
 }
 let dirs = fs.readdirSync(projectRoot).filter(name => /^20\d\d-(\d[A-Z]|qual)$/.test(name))
 
-if (fs.readFileSync(path.resolve(projectRoot, '.git', 'HEAD'), {encoding: 'utf8'}).indexOf('master') >= 0) {
+if (fs.readFileSync(path.resolve(projectRoot, '.git', 'HEAD'), {encoding: 'utf8'}).indexOf('master') >= 0 || process.env.TRAVIS_BRANCH === "master") {
   uploadToReplit = true
   await replit.login(process.env.REPLIT_SID)
 } else {
