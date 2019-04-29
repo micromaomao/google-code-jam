@@ -1,7 +1,3 @@
-/*
-	For some reason, this code REs on Google's server and WAs on my computer with the testing tool.
-*/
-
 package main
 
 import (
@@ -42,8 +38,8 @@ func Abs(f float64) float64 {
 }
 
 func test(w int) {
-	days := make([]int, 6)
 	if w == 6 {
+		days := make([]int, 6)
 		for i := 1; i <= 6; i++ {
 			fmt.Fprintf(stdout, "%d\n", i)
 			stdout.Flush()
@@ -73,7 +69,7 @@ func test(w int) {
 		var response int
 		mustReadLineOfInts(&response)
 		if response != 1 {
-			os.Exit(1)
+			os.Exit(0)
 		}
 	} else if w == 2 {
 		stdout.WriteString("200\n")
@@ -84,8 +80,8 @@ func test(w int) {
 		stdout.Flush()
 		line = mustReadLine()
 		rspTo55, _ := strconv.ParseUint(line, 10, 64)
-		a6 := (rspTo200 >> 33) % 128
-		a5 := (rspTo200 >> 40) % 128
+		a6 := (rspTo200 >> 33) % 128 // My pervious attempts had 127 in here, which led to confusingly wrong answer.
+		a5 := (rspTo200 >> 40) % 128 // However this code is still wrong even after fixing this.
 		a4 := (rspTo200 >> 50) % 128
 		a1 := (rspTo55 >> 55) % 128
 		a2 := (rspTo55 >> 27) % 128
@@ -95,7 +91,7 @@ func test(w int) {
 		var response int
 		mustReadLineOfInts(&response)
 		if response != 1 {
-			os.Exit(1)
+			os.Exit(0)
 		}
 	} else {
 		panic(w)

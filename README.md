@@ -29,3 +29,7 @@ This work is published from:
       content="CN" about="https://maowtm.org">
   China</span>.
 </p>
+
+## Interactive problems: **Do not exit with non-zero code when getting a -1 judgement**!
+
+Exiting with non-zero code will turn a WA into a confusing RE.
