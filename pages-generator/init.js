@@ -13,6 +13,12 @@ if (process.argv.length !== 2) {
   process.exit(1)
 }
 
+function delay (t) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => resolve(), t)
+  })
+}
+
 let uploadToReplit = false
 
 async function main () {
@@ -87,8 +93,22 @@ for (let seriesName of dirs) {
     let dirs = []
     let replName = 'gcj-' + problemName.replace(/ /g, '-')
     if (uploadToReplit) {
-      await replit.create('bash')
-      await replit.connect()
+      const tryAmount = 10
+      for (let i = 1; i <= tryAmount; i ++) {
+        try {
+          process.stderr.write(`REPLIT-CREATE ${replName}\n`)
+          await replit.create('bash')
+          await replit.connect()
+          break
+        } catch (e) {
+          if (i == tryAmount) {
+            throw e
+          }
+          process.stderr.write(`... failed (${e}), retrying in ${i*5}s...\n`)
+          await delay(i * 5000)
+          continue
+        }
+      }
     }
     async function rec(c) {
       let list = fs.readdirSync(c)
