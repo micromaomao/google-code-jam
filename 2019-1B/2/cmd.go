@@ -81,12 +81,16 @@ func test(w int) {
 		line = mustReadLine()
 		rspTo55, _ := strconv.ParseUint(line, 10, 64)
 		a6 := (rspTo200 >> 33) % 128 // My pervious attempts had 127 in here, which led to confusingly wrong answer.
-		a5 := (rspTo200 >> 40) % 128 // However this code is still wrong even after fixing this.
+		a5 := (rspTo200 >> 40) % 128 // However the code is still wrong even after fixing this.
 		a4 := (rspTo200 >> 50) % 128
 		a1 := (rspTo55 >> 55) % 128
 		a2 := (rspTo55 >> 27) % 128
-		a3 := (rspTo55 >> 18) % 128
-		fmt.Fprintf(stdout, "%d %d %d %d %d %d\n", int(a1), int(a2), int(a3), int(a4), int(a5), int(a6))
+		// a3 := ((rspTo55 >> 18) - (a4 >> 5)) % 128
+		//  Then I realized this, but it is still wrong, because addition not only affect the bits being added, but it may also
+		//  carry on to one more bit to the left. Therefore, one should only start "chopping bits off" once all arithmetics are
+		//  done. The correct code should be:
+		a3 := ((rspTo55 - (a4 << 13) - (a5 << 11) - (a6 << 9)) >> 18) % 128
+		fmt.Fprintf(stdout, "%d %d %d %d %d %d\n", a1, a2, a3, a4, a5, a6)
 		stdout.Flush()
 		var response int
 		mustReadLineOfInts(&response)
