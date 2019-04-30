@@ -5,6 +5,9 @@ block content
   | !{readme}
   hr
   h2 Index
+  -let hasCorrect = false
+  -let hasSmall = false
+  -let hasWrong = false
   ul.serieslist
     -for (let s of series)
       li
@@ -13,3 +16,25 @@ block content
           -for (let l of s.links)
             li
               a(href=l.href)= l.name
+              -if (l.correct === true)
+                |  ✅
+                -hasCorrect = true
+              -else if (l.correct === 'small')
+                |  ⭕
+                -hasSmall = true
+              -else
+                |  ❌
+                -hasWrong = true
+  p
+    | Key:
+    | &nbsp;&nbsp;&nbsp;&nbsp;
+    -if (hasCorrect)
+      | ✅ = correct
+      -if (hasWrong || hasSmall)
+        | &nbsp;&nbsp;&nbsp;&nbsp;
+    -if (hasWrong)
+      | ❌ = wrong
+      -if (hasSmall)
+        | &nbsp;&nbsp;&nbsp;&nbsp;
+    -if (hasSmall)
+      | ⭕ = only solved small input

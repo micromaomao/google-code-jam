@@ -84,11 +84,8 @@ for (let seriesName of dirs) {
     }
     let outputFilePath = path.resolve(outputDir, seriesName, problemDir + '.html')
     let thisDirName = path.dirname(outputFilePath)
-    let problemName = `${seriesName} Problem ${'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[parseInt(problemDir)-1]}`
-    links.push({
-      href: path.relative(outputDir, outputFilePath),
-      name: problemName
-    })
+    let problemNo = parseInt(problemDir)
+    let problemName = `${seriesName} Problem ${'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[problemNo-1]}`
     let filesObj = {}
     let dirs = []
     let replName = 'gcj-' + problemName.replace(/ /g, '-')
@@ -226,6 +223,18 @@ for (let seriesName of dirs) {
       await replit.writeMain(mainSh)
       replitinfo = replit.getInfo()
     }
+    let problemSolved = false
+    if (solutions.find(x => x.correct === true)) {
+      problemSolved = true
+    } else if (solutions.find(x => x.correct === 'small')) {
+      problemSolved = 'small'
+    }
+    links.push({
+      href: path.relative(outputDir, outputFilePath),
+      name: problemName,
+      no: problemNo,
+      correct: problemSolved
+    })
     let output = codeTemplate({files: filesObj, solutions, problemName, replitUrl: replitinfo ? replitinfo.url : null,
                                 rootDir: path.relative(thisDirName, outputDir), hljsStyle: path.relative(thisDirName, hljsStylePath),
                                 styleSheet: path.relative(thisDirName, mainStyleSheetPath), generalJs: path.relative(thisDirName, generalJsPath)})
@@ -234,9 +243,29 @@ for (let seriesName of dirs) {
   }
   series.push({
     seriesName,
-    links
+    links: links.sort((a, b) => Math.sign(a.no - b.no))
   })
 }
+
+series.sort((a, b) => {
+  let [aYear, aRound] = a.seriesName.split('-')
+  let [bYear, bRound] = b.seriesName.split('-')
+  aYear = parseInt(aYear)
+  bYear = parseInt(bYear)
+  let yearCompare = Math.sign(aYear - bYear)
+  if (yearCompare !== 0) {
+    return yearCompare
+  }
+  if (aRound == bRound) {
+    return 0
+  }
+  if (aRound == 'qual') {
+    return -1
+  } else if (bRound == 'qual') {
+    return 1
+  }
+  return aRound<bRound ? -1 : 1
+})
 
 let readmeMdContent = fs.readFileSync(path.resolve(projectRoot, "README.md"), {encoding: 'utf8'})
 
