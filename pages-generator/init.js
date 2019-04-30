@@ -238,7 +238,11 @@ for (let seriesName of dirs) {
   })
 }
 
-let indexHtml = indexTemplate({series, styleSheet: path.relative(outputDir, mainStyleSheetPath), generalJs: path.relative(outputDir, generalJsPath)})
+let readmeMdContent = fs.readFileSync(path.resolve(projectRoot, "README.md"), {encoding: 'utf8'})
+
+let indexHtml = indexTemplate({series, readme: marked.parse(readmeMdContent, {
+  sanitize: false
+}), styleSheet: path.relative(outputDir, mainStyleSheetPath), generalJs: path.relative(outputDir, generalJsPath)})
 fs.writeFileSync(path.resolve(outputDir, 'index.html'), indexHtml)
 process.stderr.write(`PUG index.html\n`)
 

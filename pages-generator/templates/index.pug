@@ -2,7 +2,9 @@ extends layout
 block head
   title Index - Mao's Google Code Jam practice files
 block content
-  h1 Mao's Google Code Jam practice files
+  | !{readme}
+  hr
+  h2 Index
   ul.serieslist
     -for (let s of series)
       li

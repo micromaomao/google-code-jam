@@ -1,4 +1,4 @@
-# Google Code Jam - my practise files
+# Mao's Google Code Jam practice files
 
 Materials for a live round are only published when that round ends, of course.
 
@@ -30,6 +30,8 @@ This work is published from:
   China</span>.
 </p>
 
-## Interactive problems: **Do not exit with non-zero code when getting a -1 judgement**!
+## Some general experiences
 
-Exiting with non-zero code will turn a WA into a confusing RE.
+* Always use 64 bit float.
+* Interactive problems: **Do not exit with non-zero code when getting a -1 judgement**! Exiting with non-zero code will
+  turn a WA into a confusing RE.
