@@ -56,9 +56,7 @@ func (p Packages) Less(i int, j int) bool {
 }
 
 func (p Packages) Swap(i int, j int) {
-	tmp := p[i]
-	p[i] = p[j]
-	p[j] = tmp
+	p[i], p[j] = p[j], p[i]
 }
 
 func test() int {

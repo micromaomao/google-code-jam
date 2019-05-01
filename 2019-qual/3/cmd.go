@@ -33,9 +33,7 @@ func (pl *PrimeList) Less(i int, j int) bool {
 }
 
 func (pl *PrimeList) Swap(i int, j int) {
-	tmp := (*pl)[i]
-	(*pl)[i] = (*pl)[j]
-	(*pl)[j] = tmp
+	(*pl)[i], (*pl)[j] = (*pl)[j], (*pl)[i]
 }
 
 func (pl PrimeList) SearchFor(i *big.Int) int {

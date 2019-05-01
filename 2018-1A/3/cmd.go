@@ -49,9 +49,7 @@ func test() {
 	for i := 0; i < len(cookies); i++ {
 		cookie := &cookies[i]
 		if cookie.w < cookie.h {
-			tmp := cookie.w
-			cookie.w = cookie.h
-			cookie.h = tmp
+			cookie.w, cookie.h = cookie.h, cookie.w
 		}
 		cookieP := 2 * (cookie.w + cookie.h)
 		cookie.pAdditionalMin = float64(2*(cookie.w+2*cookie.h) - cookieP)
@@ -93,9 +91,7 @@ func (its IntervalArray) Less(i int, j int) bool {
 }
 
 func (its IntervalArray) Swap(i int, j int) {
-	tmp := its[i]
-	its[i] = its[j]
-	its[j] = tmp
+	its[i], its[j] = its[j], its[i]
 }
 
 func mergeIntervals(its *IntervalArray, maxMin float64) {

@@ -97,9 +97,7 @@ func findPath(grid [][]bool, trail []Point, trailLen int) bool {
 func shufflePoints(ps []Point) {
 	for i := 0; i < len(ps)-1; i++ {
 		j := rand.Intn(len(ps)-i) + i
-		tmp := ps[i]
-		ps[i] = ps[j]
-		ps[j] = tmp
+		ps[i], ps[j] = ps[j], ps[i]
 	}
 }
 

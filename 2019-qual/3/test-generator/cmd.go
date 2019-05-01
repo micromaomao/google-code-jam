@@ -56,9 +56,7 @@ func main() {
 			msg = append(msg, 'A'+rune(idx))
 		}
 		rand.Shuffle(len(msg), func(i, j int) {
-			tmp := msg[i]
-			msg[i] = msg[j]
-			msg[j] = tmp
+			msg[i], msg[j] = msg[j], msg[i]
 		})
 		out.WriteString(string(msg))
 		out.WriteByte('\n')
