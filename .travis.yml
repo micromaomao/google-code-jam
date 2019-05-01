@@ -7,7 +7,17 @@ node_js:
 
 script:
   - >
+    go version &&
+    cd snippets &&
+    go test &&
+    cd .. &&
+    projRoot=$(pwd) &&
+    cd /tmp/ &&
+    wget 'https://github.com/client9/misspell/releases/download/v0.3.4/misspell_0.3.4_linux_64bit.tar.gz' -O misspell.tar.gz &&
+    tar zxf misspell.tar.gz &&
+    cd $projRoot &&
     git clean -dffxn &&
+    git ls-files -co --exclude-standard | xargs /tmp/misspell --error &&
     cd pages-generator &&
     npm install &&
     ./init.js &&
