@@ -122,8 +122,8 @@ a:
 	var realSum float64 = 0
 	for i := 0; i < len(larr); i++ {
 		f := float64(larr[i].numVotes) / float64(N)
-		precentage := int(Round(f * 100))
-		sum += precentage
+		percentage := int(Round(f * 100))
+		sum += percentage
 		realSum += f
 	}
 	assert(Abs(realSum-1) < 1e-7)

@@ -47,8 +47,8 @@ func test() {
 		count++
 	}
 	// The following 16 lines of code is wrong. This is because although the topic added in each loop will not be fake *at
-	// that time*, it can cause pervious topics to become fake. I think my mistake is that I thought of the relationship of
-	// "faked from" is undirected: if the new topic can't be faked from pervious topics, pervious topics can't be faked
+	// that time*, it can cause previous topics to become fake. I think my mistake is that I thought of the relationship of
+	// "faked from" is undirected: if the new topic can't be faked from previous topics, previous topics can't be faked
 	// from the new topic. This is not true because "faked from" is a 1-to-2 relationship.
 	for i, t := range topics {
 		if _, exist := rightMap[t.right]; exist {

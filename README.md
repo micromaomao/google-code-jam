@@ -4,7 +4,7 @@ Materials for a live round are only published when that round ends, of course.
 
 Some (difficult / error-prone, etc.) problems will have a test generator that can generate large amount of input (and sometimes output) for debugging. There may also be files like `problem.in` which contains test cases that had caused me problems and took me a long time to realize what's wrong.
 
-Some `*.in` files will have corrosponding `*.out` files, representing the expected output. Otherwise, you can simply download the top solvers' code and run it on your input.
+Some `*.in` files will have corresponding `*.out` files, representing the expected output. Otherwise, you can simply download the top solvers' code and run it on your input.
 
 Sources and all additional materials posted here are released to the public domain.
 

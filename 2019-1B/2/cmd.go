@@ -80,7 +80,7 @@ func test(w int) {
 		stdout.Flush()
 		line = mustReadLine()
 		rspTo55, _ := strconv.ParseUint(line, 10, 64)
-		a6 := (rspTo200 >> 33) % 128 // My pervious attempts had 127 in here, which led to confusingly wrong answer.
+		a6 := (rspTo200 >> 33) % 128 // My previous attempts had 127 in here, which led to confusingly wrong answer.
 		a5 := (rspTo200 >> 40) % 128 // However the code is still wrong even after fixing this.
 		a4 := (rspTo200 >> 50) % 128
 		a1 := (rspTo55 >> 55) % 128
