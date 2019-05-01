@@ -13,7 +13,7 @@ script:
     cd .. &&
     projRoot=$(pwd) &&
     cd /tmp/ &&
-    wget 'https://github.com/client9/misspell/releases/download/v0.3.4/misspell_0.3.4_linux_64bit.tar.gz' -O misspell.tar.gz &&
+    wget --no-verbose 'https://github.com/client9/misspell/releases/download/v0.3.4/misspell_0.3.4_linux_64bit.tar.gz' -O misspell.tar.gz &&
     tar zxf misspell.tar.gz &&
     cd $projRoot &&
     git clean -dffxn &&
