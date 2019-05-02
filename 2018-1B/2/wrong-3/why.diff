@@ -1,0 +1,18 @@
+--- wrong-3/cmd.go	2019-04-29 19:52:34.057947600 +0800
++++ small/cmd.go	2019-05-02 16:14:44.682000000 +0800
+@@ -78,6 +78,7 @@
+ 						break
+ 					} else if !mSet {
+ 						m = s.m
++						mSet = true
+ 					}
+ 					sLen += s.mLen
+ 				} else {
+@@ -85,6 +86,7 @@
+ 						break
+ 					} else if !nSet {
+ 						n = s.n
++						nSet = true
+ 					}
+ 					sLen += s.nLen
+ 				}

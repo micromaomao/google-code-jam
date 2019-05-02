@@ -78,6 +78,7 @@ func test() {
 						break
 					} else if !mSet {
 						m = s.m
+						mSet = true
 					}
 					sLen += s.mLen
 				} else {
@@ -85,6 +86,7 @@ func test() {
 						break
 					} else if !nSet {
 						n = s.n
+						nSet = true
 					}
 					sLen += s.nLen
 				}

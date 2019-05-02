@@ -1,0 +1,37 @@
+--- wrong-2/cmd.go	2019-04-29 19:52:34.056966100 +0800
++++ wrong-3/cmd.go	2019-04-29 19:52:34.057947600 +0800
+@@ -92,25 +92,15 @@
+ 			}
+ 			return sLen
+ 		}
+-		if startSign.mLen > startSign.nLen {
+-			m = startSign.m
+-			mSet = true
+-			setSize = continueWith(true)
+-		} else if startSign.mLen < startSign.nLen {
+-			n = startSign.n
+-			nSet = true
+-			setSize = continueWith(false)
+-		} else {
+-			m = startSign.m
+-			mSet = true
+-			nSet = false
+-			a := continueWith(true)
+-			n = startSign.n
+-			nSet = true
+-			mSet = false
+-			b := continueWith(false)
+-			setSize = max(a, b)
+-		}
++		m = startSign.m
++		mSet = true
++		nSet = false
++		a := continueWith(true)
++		n = startSign.n
++		nSet = true
++		mSet = false
++		b := continueWith(false)
++		setSize = max(a, b)
+ 		if maxValidSetLen < setSize {
+ 			maxValidSetLen = setSize
+ 			maxSetCount = 1
