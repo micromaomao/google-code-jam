@@ -186,10 +186,23 @@ for (let seriesName of dirs) {
     }
     await rec(dirPath)
     let solutions = []
+    function findInitFile(prefix) {
+      let names = ["cmd.go", "why.diff"]
+      for (let n of names) {
+        let path = prefix + '/' + n
+        if (prefix == '') {
+          path = n
+        }
+        if (filesObj[path]) {
+          return path
+        }
+      }
+      return null
+    }
     if (filesObj['cmd.go']) {
       solutions.push({
         no: 1,
-        cmd: 'cmd.go',
+        cmd: findInitFile(''),
         correct: true
       })
     } else if (dirs.find(x => /^solution-\d+$/.test(x))) {
@@ -197,7 +210,7 @@ for (let seriesName of dirs) {
       for (let sln of solutionNumbers) {
         solutions.push({
           no: sln,
-          cmd: `solution-${sln}/cmd.go`,
+          cmd: findInitFile(`solution-${sln}`),
           correct: true
         })
       }
@@ -206,14 +219,14 @@ for (let seriesName of dirs) {
     for (let sol of wrongSolutions) {
       solutions.push({
         no: sol,
-        cmd: `${sol}/cmd.go`,
+        cmd: findInitFile(sol),
         correct: false
       })
     }
     if (dirs.includes('small')) {
       solutions.push({
         no: 'small',
-        cmd: 'small/cmd.go',
+        cmd: findInitFile('small'),
         correct: 'small'
       })
     }
