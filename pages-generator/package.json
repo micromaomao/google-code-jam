@@ -9,7 +9,7 @@
   "author": "Mao Wtm <m@maowtm.org>",
   "license": "CC0",
   "dependencies": {
-    "jstransformer-highlight": "^2.0.0",
+    "highlight.js": "^9.15.6",
     "marked": "^0.6.2",
     "node-sass": "^4.11.0",
     "pug": "^2.0.3",

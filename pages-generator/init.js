@@ -2,7 +2,7 @@
 const fs = require('fs')
 const path = require('path')
 const pug = require('pug')
-const highlight = require('jstransformer')(require('jstransformer-highlight'))
+const hljs = require('highlight.js')
 const sass = require('node-sass')
 const marked = require('marked')
 const ReplitClient = require('repl.it-api')
@@ -155,13 +155,13 @@ for (let seriesName of dirs) {
             } else if ((idx = fileContent.indexOf(typicalStartFunc2)) >= 0) {
               fileContent = fileContent.substr(0, idx) + replaceWith + fileContent.substr(idx + typicalStartFunc2.length)
             }
-            highlightRender = highlight.render(fileContent, {language: 'golang'}).body
+            highlightRender = hljs.highlight('golang', fileContent, false).value
           } else if (file.endsWith('.cc') || file.endsWith('.cpp') || file.endsWith('.c')) {
-            highlightRender = highlight.render(fileContent, {language: 'c'}).body
+            highlightRender = hljs.highlight('c', fileContent, false).value
           } else if (file.endsWith('.py')) {
-            highlightRender = highlight.render(fileContent, {language: 'python'}).body
+            highlightRender = hljs.highlight('python', fileContent, false).value
           } else if (file.endsWith('.diff')) {
-            highlightRender = highlight.render(fileContent, {language: 'diff'}).body
+            highlightRender = hljs.highlight('diff', fileContent, false).value
           } else if (file.endsWith('.md')) {
             highlightRender = marked.parse(fileContent, {
               sanitize: true
