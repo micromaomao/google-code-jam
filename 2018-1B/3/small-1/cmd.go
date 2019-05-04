@@ -1,3 +1,5 @@
+// Works for: Test set 1
+
 package main
 
 import (

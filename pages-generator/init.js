@@ -160,6 +160,8 @@ for (let seriesName of dirs) {
             highlightRender = highlight.render(fileContent, {language: 'c'}).body
           } else if (file.endsWith('.py')) {
             highlightRender = highlight.render(fileContent, {language: 'python'}).body
+          } else if (file.endsWith('.diff')) {
+            highlightRender = highlight.render(fileContent, {language: 'diff'}).body
           } else if (file.endsWith('.md')) {
             highlightRender = marked.parse(fileContent, {
               sanitize: true
@@ -223,10 +225,11 @@ for (let seriesName of dirs) {
         correct: false
       })
     }
-    if (dirs.includes('small')) {
+    let smallSolutions = dirs.filter(x => /^small(-\d+)?$/.test(x))
+    for (let sol of smallSolutions) {
       solutions.push({
-        no: 'small',
-        cmd: findInitFile('small'),
+        no: sol,
+        cmd: findInitFile(sol),
         correct: 'small'
       })
     }
@@ -247,6 +250,15 @@ for (let seriesName of dirs) {
       name: problemName,
       no: problemNo,
       correct: problemSolved
+    })
+    solutions = solutions.sort((a, b) => {
+      if (a.no < b.no) {
+        return -1
+      } else if (a.no > b.no) {
+        return 1
+      } else {
+        return 0
+      }
     })
     let output = codeTemplate({files: filesObj, solutions, problemName, replitUrl: replitinfo ? replitinfo.url : null,
                                 rootDir: path.relative(thisDirName, outputDir), hljsStyle: path.relative(thisDirName, hljsStylePath),

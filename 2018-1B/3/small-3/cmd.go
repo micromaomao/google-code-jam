@@ -1,3 +1,5 @@
+// Works for: Test set 1 and 2
+
 // This approach use binary search, answering the question "can we make n lead"?
 package main
 
