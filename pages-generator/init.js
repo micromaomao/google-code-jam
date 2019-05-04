@@ -47,7 +47,7 @@ if (fs.readFileSync(path.resolve(projectRoot, '.git', 'HEAD'), {encoding: 'utf8'
 process.chdir(__dirname)
 let codeTemplate = pug.compileFile(path.resolve(__dirname, 'templates', 'code.pug'))
 let indexTemplate = pug.compileFile(path.resolve(__dirname, 'templates', 'index.pug'))
-let hljsStyleContent = fs.readFileSync(path.resolve(__dirname, "node_modules/highlight.js/styles/github.css"), {encoding: 'utf8'})
+let hljsStyleContent = fs.readFileSync(path.resolve(__dirname, "node_modules/highlight.js/styles/idea.css"), {encoding: 'utf8'})
 let hljsStylePath = path.resolve(outputDir, "commons", "hljs.css")
 process.stderr.write(`CP ${path.relative(outputDir, hljsStylePath)}\n`)
 fs.writeFileSync(hljsStylePath, hljsStyleContent)

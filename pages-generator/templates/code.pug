@@ -23,7 +23,10 @@ block content
     -else
       pre
         -if (f.highlightRender)
-          code.hljs!= f.highlightRender
+          -if (f.path.endsWith('.diff'))
+            code.hljs.diff!= f.highlightRender
+          -else
+            code.hljs!= f.highlightRender
         -else
           code.hljs= f.content
   -let correctSolutions = solutions.filter(x => x.correct === true)
