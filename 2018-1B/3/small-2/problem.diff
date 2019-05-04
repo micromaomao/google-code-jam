@@ -1,0 +1,30 @@
+--- wrong-1/cmd.go      2019-05-04 10:14:06.360786578 +0800
++++ cmd.go      2019-05-04 10:12:48.562777456 +0800
+@@ -92,18 +92,23 @@
+                }
+                if produceAmount == 0 {
+                        for _, mtLacking := range limitingMetals {
+-                               requiredAmount := recipe[mtLacking]
+-                               delete(recipe, mtLacking)
+                                metalLacking := metals[mtLacking]
++                               hasAmount := metalLacking.hasAmount
++                               additionalRequiredAmount := recipe[mtLacking] - hasAmount
++                               if hasAmount == 0 {
++                                       delete(recipe, mtLacking)
++                               } else {
++                                       recipe[mtLacking] = hasAmount
++                               }
+                                if metalLacking.ing1 == mtLacking {
+                                        break a
+                                } else {
+-                                       recipe[metalLacking.ing1] += requiredAmount
++                                       recipe[metalLacking.ing1] += additionalRequiredAmount
+                                }
+                                if metalLacking.ing2 == mtLacking {
+                                        break a
+                                } else {
+-                                       recipe[metalLacking.ing2] += requiredAmount
++                                       recipe[metalLacking.ing2] += additionalRequiredAmount
+                                }
+                        }
+                } else {

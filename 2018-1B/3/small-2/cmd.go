@@ -92,22 +92,23 @@ a:
 		}
 		if produceAmount == 0 {
 			for _, mtLacking := range limitingMetals {
-				requiredAmount := recipe[mtLacking]
-				{
-					_, exist := recipe[mtLacking]
-					assert(exist)
-				}
-				delete(recipe, mtLacking)
 				metalLacking := metals[mtLacking]
+				hasAmount := metalLacking.hasAmount
+				additionalRequiredAmount := recipe[mtLacking] - hasAmount
+				if hasAmount == 0 {
+					delete(recipe, mtLacking)
+				} else {
+					recipe[mtLacking] = hasAmount
+				}
 				if metalLacking.ing1 == mtLacking {
 					break a
 				} else {
-					recipe[metalLacking.ing1] += requiredAmount
+					recipe[metalLacking.ing1] += additionalRequiredAmount
 				}
 				if metalLacking.ing2 == mtLacking {
 					break a
 				} else {
-					recipe[metalLacking.ing2] += requiredAmount
+					recipe[metalLacking.ing2] += additionalRequiredAmount
 				}
 			}
 		} else {
