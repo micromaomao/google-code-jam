@@ -5,21 +5,11 @@ const pug = require('pug')
 const hljs = require('highlight.js')
 const sass = require('node-sass')
 const marked = require('marked')
-const ReplitClient = require('repl.it-api')
-let replit = new ReplitClient()
 
 if (process.argv.length !== 2) {
   process.stdout.write("Expected no arguments.\n")
   process.exit(1)
 }
-
-function delay (t) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => resolve(), t)
-  })
-}
-
-let uploadToReplit = false
 
 async function main () {
 
@@ -36,13 +26,6 @@ try {
   if (e.code !== 'EEXIST') throw e
 }
 let dirs = fs.readdirSync(projectRoot).filter(name => /^20\d\d-(\d[A-Z]|qual)$/.test(name))
-
-if (fs.readFileSync(path.resolve(projectRoot, '.git', 'HEAD'), {encoding: 'utf8'}).indexOf('master') >= 0 || process.env.TRAVIS_BRANCH === "master") {
-  uploadToReplit = true
-  await replit.login(process.env.REPLIT_SID)
-} else {
-  replit = null
-}
 
 process.chdir(__dirname)
 let codeTemplate = pug.compileFile(path.resolve(__dirname, 'templates', 'code.pug'))
@@ -88,25 +71,6 @@ for (let seriesName of dirs) {
     let problemName = `${seriesName} Problem ${'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[problemNo-1]}`
     let filesObj = {}
     let dirs = []
-    let replName = 'gcj-' + problemName.replace(/ /g, '-')
-    if (uploadToReplit) {
-      const tryAmount = 10
-      for (let i = 1; i <= tryAmount; i ++) {
-        try {
-          process.stderr.write(`REPLIT-CREATE ${replName}\n`)
-          await replit.create('bash')
-          await replit.connect()
-          break
-        } catch (e) {
-          if (i == tryAmount) {
-            throw e
-          }
-          process.stderr.write(`... failed (${e}), retrying in ${i*5}s...\n`)
-          await delay(i * 5000)
-          continue
-        }
-      }
-    }
     async function rec(c) {
       let list = fs.readdirSync(c)
       for (let file of list) {
@@ -119,10 +83,6 @@ for (let seriesName of dirs) {
         } else if (stat.isFile()) {
           let fileOrigContent = fs.readFileSync(fp, {encoding: null})
           let fileContent = fileOrigContent.toString('utf8')
-          if (uploadToReplit) {
-            process.stderr.write(`REPLIT-WRITE ${replName} ${fileRelPath}\n`)
-            await replit.write(fileRelPath, fileContent)
-          }
           let highlightRender = null
           if (file.endsWith('.go')) {
             let boilerPlateStartIndex = fileContent.indexOf('/*********Start boilerplate***********/')
@@ -233,12 +193,6 @@ for (let seriesName of dirs) {
         correct: 'small'
       })
     }
-    let replitinfo = null
-    if (uploadToReplit) {
-      let mainSh = `go build && ./runner${filesObj['sample.in'] ? ' < sample.in' : ''}\n# Check out files from the sidebar.`
-      await replit.writeMain(mainSh)
-      replitinfo = replit.getInfo()
-    }
     let problemSolved = false
     if (solutions.find(x => x.correct === true)) {
       problemSolved = true
@@ -260,7 +214,7 @@ for (let seriesName of dirs) {
         return 0
       }
     })
-    let output = codeTemplate({files: filesObj, solutions, problemName, replitUrl: replitinfo ? replitinfo.url : null,
+    let output = codeTemplate({files: filesObj, solutions, problemName,
                                 rootDir: path.relative(thisDirName, outputDir), hljsStyle: path.relative(thisDirName, hljsStylePath),
                                 styleSheet: path.relative(thisDirName, mainStyleSheetPath), generalJs: path.relative(thisDirName, generalJsPath)})
     fs.writeFileSync(outputFilePath, output)
