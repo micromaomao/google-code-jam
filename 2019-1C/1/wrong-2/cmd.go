@@ -81,6 +81,7 @@ func test() {
 			myProg[currentUpTo] = try
 			ck := check(currentUpTo)
 			if ck == 1 {
+				maxLen = currentUpTo + 1
 				return true
 			} else if ck == -1 {
 				continue
@@ -93,7 +94,7 @@ func test() {
 		return false
 	}
 	if search(0) {
-		stdout.Write(myProg)
+		stdout.Write(myProg[:maxLen])
 		stdout.WriteByte('\n')
 	} else {
 		stdout.WriteString("IMPOSSIBLE\n")
