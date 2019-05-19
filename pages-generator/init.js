@@ -107,7 +107,7 @@ for (let seriesName of dirs) {
 	}
 }`
             const replaceWith = `func start() {
-  // read T, repeat test() t times...
+  // read T, repeat test() T times...
 }`
             let idx = fileContent.indexOf(typicalStartFunc)
             if (idx >= 0) {
