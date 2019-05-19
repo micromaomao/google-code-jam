@@ -1,3 +1,4 @@
+// There is a better way to think about this problem. See the last paragraph of the analysis.
 package main
 
 import (
@@ -48,12 +49,9 @@ func test() {
 	var A int
 	mustReadLineOfInts(&A)
 	otherPrograms := make([][]byte, A)
-	maxLen := 0
+	maxLen := A
 	for i := 0; i < A; i++ {
 		otherPrograms[i] = []byte(mustReadLine())
-		if len(otherPrograms[i]) > maxLen {
-			maxLen = len(otherPrograms[i])
-		}
 	}
 	myProg := make([]byte, maxLen)
 	var next func(pos int, _defeatedOpponents []bool) bool
@@ -104,7 +102,7 @@ func test() {
 		for i, result := range opResult {
 			myProg[pos] = opToTry[i]
 			if result == 0 {
-				if pos == len(myProg)-1 {
+				if pos == maxLen-1 {
 					continue
 				}
 				if next(pos+1, opResult_defeatedComponent[i]) {
