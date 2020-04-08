@@ -263,6 +263,8 @@ let indexHtml = indexTemplate({series, readme: marked.parse(readmeMdContent, {
 }), styleSheet: path.relative(outputDir, mainStyleSheetPath), generalJs: path.relative(outputDir, generalJsPath)})
 fs.writeFileSync(path.resolve(outputDir, 'index.html'), indexHtml)
 process.stderr.write(`PUG index.html\n`)
+fs.writeFileSync(path.resolve(outputDir, 'CNAME'), "codejam.maowtm.org\n")
+process.stderr.write(`ECHO > CNAME\n`)
 
 }
 
