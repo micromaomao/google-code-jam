@@ -149,7 +149,7 @@ for (let seriesName of dirs) {
     await rec(dirPath)
     let solutions = []
     function findInitFile(prefix) {
-      let names = ["cmd.go", "why.diff"]
+      let names = ["cmd.go", "main.cc", "why.diff"]
       for (let n of names) {
         let path = prefix + '/' + n
         if (prefix == '') {
@@ -162,6 +162,12 @@ for (let seriesName of dirs) {
       return null
     }
     if (filesObj['cmd.go']) {
+      solutions.push({
+        no: 1,
+        cmd: findInitFile(''),
+        correct: true
+      })
+    } else if (filesObj['main.cc']) {
       solutions.push({
         no: 1,
         cmd: findInitFile(''),
