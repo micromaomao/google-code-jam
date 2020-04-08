@@ -72,6 +72,9 @@ for (let seriesName of dirs) {
     let filesObj = {}
     let dirs = []
     async function rec(c) {
+      if (c.endsWith("/.history")) {
+        return
+      }
       let list = fs.readdirSync(c)
       for (let file of list) {
         let fp = path.resolve(c, file)
@@ -118,6 +121,12 @@ for (let seriesName of dirs) {
             highlightRender = hljs.highlight('golang', fileContent, false).value
           } else if (file.endsWith('.cc') || file.endsWith('.cpp') || file.endsWith('.c')) {
             highlightRender = hljs.highlight('c', fileContent, false).value
+          } else if (file.endsWith('.rs')) {
+            let boilerPlateStartIndex = fileContent.indexOf('// ---- start boilerplate ----')
+            if (boilerPlateStartIndex >= 0) {
+              fileContent = fileContent.substr(0, boilerPlateStartIndex).trimRight() + '\n\n// boilerplate omitted...'
+            }
+            highlightRender = hljs.highlight('rust', fileContent, false).value
           } else if (file.endsWith('.py')) {
             highlightRender = hljs.highlight('python', fileContent, false).value
           } else if (file.endsWith('.diff')) {
@@ -148,8 +157,9 @@ for (let seriesName of dirs) {
     }
     await rec(dirPath)
     let solutions = []
+    let main_names = ["cmd.go", "main.cc", "main.rs"]
     function findInitFile(prefix) {
-      let names = ["cmd.go", "main.cc", "why.diff"]
+      let names = [...main_names, "why.diff"]
       for (let n of names) {
         let path = prefix + '/' + n
         if (prefix == '') {
@@ -161,13 +171,7 @@ for (let seriesName of dirs) {
       }
       return null
     }
-    if (filesObj['cmd.go']) {
-      solutions.push({
-        no: 1,
-        cmd: findInitFile(''),
-        correct: true
-      })
-    } else if (filesObj['main.cc']) {
+    if (main_names.find(name => filesObj[name])) {
       solutions.push({
         no: 1,
         cmd: findInitFile(''),
