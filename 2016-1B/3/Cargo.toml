@@ -1,0 +1,7 @@
+[package]
+name = "main"
+version = "0.0.0"
+
+[[bin]]
+name = "main"
+path = "wrong-2/main.rs"

@@ -1,0 +1,11 @@
+[package]
+name = "a"
+version = "0.0.0"
+
+[[bin]]
+name = "1-bruteforce"
+path = "1/brute_force/main.rs"
+
+[[bin]]
+name = "2-small"
+path = "2/small/main.rs"
