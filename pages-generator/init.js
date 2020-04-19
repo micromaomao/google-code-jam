@@ -77,6 +77,9 @@ for (let seriesName of dirs) {
       }
       let list = fs.readdirSync(c)
       for (let file of list) {
+        if (["Cargo.toml", ".gitignore"].includes(file)) {
+          continue;
+        }
         let fp = path.resolve(c, file)
         let fileRelPath = path.relative(dirPath, fp)
         let stat = fs.statSync(fp)
@@ -139,7 +142,7 @@ for (let seriesName of dirs) {
           let emitPath = path.resolve(thisDirName, "files", fileRelPath)
           let emitDir = path.dirname(emitPath)
           try {
-            fs.mkdirSync(emitDir)
+            fs.mkdirSync(emitDir, {recursive: true})
           } catch (e) {
             if (e.code !== 'EEXIST') throw e
           }
@@ -189,10 +192,18 @@ for (let seriesName of dirs) {
     }
     let wrongSolutions = dirs.filter(x => /^(wrong|incorrect)(-\d+)?$/.test(x))
     for (let sol of wrongSolutions) {
+      let problemFile = filesObj[`${sol}/problem.in`];
+      if (!problemFile) {
+        problemFile = filesObj["problem.in"];
+      }
+      if (!problemFile) {
+        problemFile = null;
+      }
       solutions.push({
         no: sol,
         cmd: findInitFile(sol),
-        correct: false
+        correct: false,
+        problemFile: problemFile == null ? null : problemFile.path
       })
     }
     let smallSolutions = dirs.filter(x => /^small(-\d+)?$/.test(x))

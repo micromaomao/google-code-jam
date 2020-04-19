@@ -49,9 +49,14 @@ block content
       -for (let sol of wrongSolutions)
         h3= sol.no
         +showFile(files[sol.cmd])
-    -if (files['problem.in'])
+        -if (files[`${sol.no}/problem.in`])
+          +showFile(files[`${sol.no}/problem.in`])
+          -if (files[`${sol.no}/problem.out`])
+            h4 Expected output
+            +showFile(files[`${sol.no}/problem.out`])
+    -if (files['problem.in'] && !files['problem.in'].displayed)
       +showFile(files['problem.in'])
-    -if (files['problem.out'])
+    -if (files['problem.out'] && !files['problem.in'].displayed)
       h3 Expected output
       +showFile(files['problem.out'])
   -let smallSolutions = solutions.filter(x => x.correct === 'small')
