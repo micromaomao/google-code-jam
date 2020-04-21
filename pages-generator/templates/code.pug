@@ -43,7 +43,13 @@ block content
   -if (wrongSolutions.length > 0)
     -if (wrongSolutions.length === 1)
       h2 Wrong solution
-      +showFile(files[wrongSolutions[0].cmd])
+      -let sol = wrongSolutions[0]
+      +showFile(files[sol.cmd])
+      -if (files[`${sol.no}/problem.in`])
+        +showFile(files[`${sol.no}/problem.in`])
+        -if (files[`${sol.no}/problem.out`])
+          h4 Expected output
+          +showFile(files[`${sol.no}/problem.out`])
     -else
       h2 Wrong solutions
       -for (let sol of wrongSolutions)

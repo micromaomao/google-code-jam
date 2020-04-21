@@ -192,18 +192,10 @@ for (let seriesName of dirs) {
     }
     let wrongSolutions = dirs.filter(x => /^(wrong|incorrect)(-\d+)?$/.test(x))
     for (let sol of wrongSolutions) {
-      let problemFile = filesObj[`${sol}/problem.in`];
-      if (!problemFile) {
-        problemFile = filesObj["problem.in"];
-      }
-      if (!problemFile) {
-        problemFile = null;
-      }
       solutions.push({
         no: sol,
         cmd: findInitFile(sol),
-        correct: false,
-        problemFile: problemFile == null ? null : problemFile.path
+        correct: false
       })
     }
     let smallSolutions = dirs.filter(x => /^small(-\d+)?$/.test(x))
