@@ -4,3 +4,8 @@ version = "0.0.0"
 
 [lib]
 path = "lib.rs"
+
+[dev-dependencies.rand]
+version = "0.7.3"
+default-features = false
+features = ["std", "small_rng"]

@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-// FIXME: may be wrong
 pub fn bipartite_match(m: usize, n: usize, connections: &[(usize, usize)]) -> HashSet<(usize, usize)> {
 	debug_assert!(connections.iter().collect::<HashSet<_>>().len() == connections.len());
 
@@ -94,7 +93,7 @@ pub fn bipartite_match(m: usize, n: usize, connections: &[(usize, usize)]) -> Ha
 		let dfs_path = (0..m).into_iter()
 			.filter(|i| !l_matched[*i])
 			.map(|i| dfs(Node::Left(i), &ltor, &rtol, &current_matches, &r_matched, &mut HashSet::new()))
-			.find(|x| x.is_some()).map(|x| x.unwrap());
+			.find(|x| x.is_some()).flatten();
 		if let Some(mut path) = dfs_path {
 			path.reverse();
 			debug_assert!(path.len() >= 2);
@@ -117,48 +116,4 @@ pub fn bipartite_match(m: usize, n: usize, connections: &[(usize, usize)]) -> Ha
 	}
 
 	current_matches
-}
-
-#[test]
-fn test() {
-	fn check_matches_validity(matches: &HashSet<(usize, usize)>, m: usize, n: usize) {
-		let mut match_ltor: Vec<Option<usize>> = vec![None; m];
-		let mut match_rtol: Vec<Option<usize>> = vec![None; n];
-		for (ref i, ref j) in matches.iter() {
-			assert!(*i < m && *j < n);
-			if match_ltor[*i].is_some() {
-				panic!("L{} already matched to R{}, but got ({}, {})", *i, match_ltor[*i].unwrap(), *i, *j);
-			} else {
-				match_ltor[*i] = Some(*j);
-			}
-			if match_rtol[*j].is_some() {
-				panic!("R{} already matched to L{}, but got ({}, {})", *j, match_rtol[*j].unwrap(), *i, *j);
-			} else {
-				match_rtol[*j] = Some(*i);
-			}
-		}
-	}
-
-	fn it(m: usize, n: usize, connections: &Vec<(usize, usize)>, expected_len: usize) {
-		let r = bipartite_match(m, n, connections);
-		check_matches_validity(&r, m, n);
-		assert_eq!(r.len(), expected_len);
-		use std::iter::FromIterator;
-		assert!(HashSet::from_iter(connections.into_iter().map(|x| *x)).is_superset(&r));
-	}
-
-	it(1, 3, &vec![(0, 0), (0, 1), (0, 2)], 1);
-	it(3, 1, &vec![(0, 0), (1, 0), (2, 0)], 1);
-
-	it(2, 2, &vec![], 0);
-	it(2, 2, &vec![(0, 1)], 1);
-	it(2, 2, &vec![(0, 0), (0, 1), (1, 0)], 2);
-
-	it(4, 4, &vec![(0, 3), (1, 1), (1, 2), (2, 2)], 3);
-	it(3, 3, &vec![(0, 1), (0, 2), (2, 1)], 2);
-	it(3, 3, &vec![(0, 1), (0, 2), (2, 1), (2, 0)], 2);
-
-	it(4, 3, &vec![(0, 0), (0, 1), (0, 2), (1, 0), (2, 2)], 3);
-
-	it(3,2,&vec![(2,1),(0,0),(1,1)], 2);
 }

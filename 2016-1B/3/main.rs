@@ -151,19 +151,15 @@ fn test() -> usize {
 	}
 	let mut left = WordToId::with_capacity(n);
 	let mut right = WordToId::with_capacity(n);
-	let mut edges: Vec<(usize, usize)> = Vec::with_capacity(n);
+	let mut edges: HashSet<(usize, usize)> = HashSet::with_capacity(n);
 	for _ in 0..n {
 		let l = read_line();
 		let parts: Vec<&str> = l.split(' ').collect();
 		assert_eq!(parts.len(), 2);
 		let w = (left.insert(parts[0].to_owned()), right.insert(parts[1].to_owned()));
-		if w.0 < left.len() - 1 && w.1 < right.len() - 1 {
-			// duplicate word
-			continue;
-		}
-		edges.push(w);
+		edges.insert(w);
 	}
-	let base_set = bipartite_match(left.len(), right.len(), &edges);
+	let base_set = bipartite_match(left.len(), right.len(), &edges.iter().copied().collect::<Vec<_>>());
 	let mut left_used: Vec<bool> = vec![false; left.len()];
 	let mut right_used: Vec<bool> = vec![false; right.len()];
 	for w in base_set.iter().copied() {
