@@ -1,0 +1,31 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2015-qual Problem A - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2015-qual Problem A</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2015-qual/1/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> t <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;t)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; t; i++ {
+		line := strings.Split(mustReadLine(), <span class="hljs-string">" "</span>)
+		sMax := mustAtoi(line[<span class="hljs-number">0</span>])
+		audArray := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(line[<span class="hljs-number">1</span>]))
+		<span class="hljs-keyword">for</span> _, n := <span class="hljs-keyword">range</span> line[<span class="hljs-number">1</span>] {
+			audArray = <span class="hljs-built_in">append</span>(audArray, mustAtoi(<span class="hljs-keyword">string</span>(n)))
+		}
+		<span class="hljs-keyword">var</span> numInsertion <span class="hljs-keyword">int</span>
+		<span class="hljs-keyword">var</span> numStoodUp <span class="hljs-keyword">int</span>
+		<span class="hljs-keyword">for</span> sLevel, numPpl := <span class="hljs-keyword">range</span> audArray {
+			<span class="hljs-keyword">if</span> sLevel &lt;= numStoodUp {
+				numStoodUp += numPpl
+				<span class="hljs-keyword">if</span> numStoodUp &gt;= sMax {
+					<span class="hljs-keyword">break</span>
+				}
+			} <span class="hljs-keyword">else</span> {
+				numInsertion += sLevel - numStoodUp
+				numStoodUp += sLevel - numStoodUp + numPpl
+			}
+			<span class="hljs-comment">// debug(fmt.Sprintf("at sLevel = %v: numStoodUp = %v, numInsertion = %v", sLevel, numStoodUp, numInsertion))</span>
+		}
+		stdout.WriteString(fmt.Sprintf(<span class="hljs-string">"Case #%d: %d\n"</span>, i+<span class="hljs-number">1</span>, numInsertion))
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre></body></html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2019-1C Problem A - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2019-1C Problem A</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1C/1/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// There is a better way to think about this problem. See the last paragraph of the analysis.</span>
+<span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">round</span><span class="hljs-params">(my, other <span class="hljs-keyword">byte</span>)</span> <span class="hljs-title">int8</span></span> {
+	<span class="hljs-keyword">switch</span> my {
+	<span class="hljs-keyword">case</span> <span class="hljs-string">'R'</span>:
+		<span class="hljs-keyword">if</span> other == <span class="hljs-string">'P'</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>
+		} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> other == <span class="hljs-string">'S'</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>
+		}
+	<span class="hljs-keyword">case</span> <span class="hljs-string">'P'</span>:
+		<span class="hljs-keyword">if</span> other == <span class="hljs-string">'S'</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>
+		} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> other == <span class="hljs-string">'R'</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>
+		}
+	<span class="hljs-keyword">case</span> <span class="hljs-string">'S'</span>:
+		<span class="hljs-keyword">if</span> other == <span class="hljs-string">'R'</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>
+		} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> other == <span class="hljs-string">'P'</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>
+		}
+	<span class="hljs-keyword">default</span>:
+		<span class="hljs-built_in">panic</span>(<span class="hljs-string">"!"</span>)
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> A <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;A)
+	otherPrograms := <span class="hljs-built_in">make</span>([][]<span class="hljs-keyword">byte</span>, A)
+	maxLen := A
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; A; i++ {
+		otherPrograms[i] = []<span class="hljs-keyword">byte</span>(mustReadLine())
+	}
+	myProg := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, maxLen)
+	<span class="hljs-keyword">var</span> next <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(pos <span class="hljs-keyword">int</span>, _defeatedOpponents []<span class="hljs-keyword">bool</span>)</span> <span class="hljs-title">bool</span></span>
+	next = <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(pos <span class="hljs-keyword">int</span>, _defeatedOpponents []<span class="hljs-keyword">bool</span>)</span> <span class="hljs-title">bool</span></span> {
+		opToTry := []<span class="hljs-keyword">byte</span>{<span class="hljs-string">'R'</span>, <span class="hljs-string">'P'</span>, <span class="hljs-string">'S'</span>}
+		opResult := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int8</span>, <span class="hljs-number">3</span>)
+		opResult_defeatedComponent := <span class="hljs-built_in">make</span>([][]<span class="hljs-keyword">bool</span>, <span class="hljs-number">3</span>)
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">3</span>; i++ {
+			opResult_defeatedComponent[i] = <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">bool</span>, <span class="hljs-built_in">len</span>(_defeatedOpponents))
+			<span class="hljs-built_in">copy</span>(opResult_defeatedComponent[i], _defeatedOpponents)
+		}
+		<span class="hljs-keyword">for</span> i, myOp := <span class="hljs-keyword">range</span> opToTry {
+			defeatedAll := <span class="hljs-literal">true</span>
+			lose := <span class="hljs-literal">false</span>
+			<span class="hljs-keyword">for</span> opponentId, oppProgram := <span class="hljs-keyword">range</span> otherPrograms {
+				<span class="hljs-keyword">if</span> opResult_defeatedComponent[i][opponentId] {
+					<span class="hljs-keyword">continue</span>
+				}
+				otherOp := oppProgram[pos%<span class="hljs-built_in">len</span>(oppProgram)]
+				vsRes := round(myOp, otherOp)
+				<span class="hljs-keyword">if</span> vsRes == <span class="hljs-number">1</span> {
+					opResult_defeatedComponent[i][opponentId] = <span class="hljs-literal">true</span>
+				} <span class="hljs-keyword">else</span> {
+					defeatedAll = <span class="hljs-literal">false</span>
+				}
+				<span class="hljs-keyword">if</span> vsRes == <span class="hljs-number">-1</span> {
+					lose = <span class="hljs-literal">true</span>
+					<span class="hljs-keyword">break</span>
+				}
+			}
+			<span class="hljs-keyword">if</span> defeatedAll {
+				opResult[i] = <span class="hljs-number">1</span>
+			} <span class="hljs-keyword">else</span> {
+				<span class="hljs-keyword">if</span> lose {
+					opResult[i] = <span class="hljs-number">-1</span>
+				} <span class="hljs-keyword">else</span> {
+					opResult[i] = <span class="hljs-number">0</span>
+				}
+			}
+		}
+		<span class="hljs-keyword">for</span> i, result := <span class="hljs-keyword">range</span> opResult {
+			myProg[pos] = opToTry[i]
+			<span class="hljs-keyword">if</span> result == <span class="hljs-number">1</span> {
+				maxLen = pos + <span class="hljs-number">1</span>
+				<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+			}
+		}
+		<span class="hljs-keyword">for</span> i, result := <span class="hljs-keyword">range</span> opResult {
+			myProg[pos] = opToTry[i]
+			<span class="hljs-keyword">if</span> result == <span class="hljs-number">0</span> {
+				<span class="hljs-keyword">if</span> pos == maxLen<span class="hljs-number">-1</span> {
+					<span class="hljs-keyword">continue</span>
+				}
+				<span class="hljs-keyword">if</span> next(pos+<span class="hljs-number">1</span>, opResult_defeatedComponent[i]) {
+					<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+				}
+			}
+		}
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+	}
+	<span class="hljs-keyword">if</span> next(<span class="hljs-number">0</span>, <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">bool</span>, A)) {
+		stdout.Write(myProg[:maxLen])
+		stdout.WriteByte(<span class="hljs-string">'\n'</span>)
+	} <span class="hljs-keyword">else</span> {
+		stdout.WriteString(<span class="hljs-string">"IMPOSSIBLE\n"</span>)
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Wrong solutions</h2><h3>wrong-1</h3><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/wrong-1/cmd.go" target="_blank">wrong-1/cmd.go</a>:</div><a class="download" href="files/wrong-1/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1C/1/wrong-1/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> A <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;A)
+	otherPrograms := <span class="hljs-built_in">make</span>([][]<span class="hljs-keyword">byte</span>, A)
+	maxLen := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; A; i++ {
+		otherPrograms[i] = []<span class="hljs-keyword">byte</span>(mustReadLine())
+		<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(otherPrograms[i]) &gt; maxLen {
+			maxLen = <span class="hljs-built_in">len</span>(otherPrograms[i])
+		}
+	}
+	myProg := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, maxLen)
+	defeated := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">bool</span>, A)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; maxLen; i++ {
+		myActionCanBe := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-keyword">byte</span>]<span class="hljs-keyword">bool</span>)
+		myActionCanBe[<span class="hljs-string">'R'</span>] = <span class="hljs-literal">true</span>
+		myActionCanBe[<span class="hljs-string">'P'</span>] = <span class="hljs-literal">true</span>
+		myActionCanBe[<span class="hljs-string">'S'</span>] = <span class="hljs-literal">true</span>
+		<span class="hljs-keyword">for</span> opponent, p := <span class="hljs-keyword">range</span> otherPrograms {
+			<span class="hljs-keyword">if</span> defeated[opponent] {
+				<span class="hljs-keyword">continue</span>
+			}
+			<span class="hljs-keyword">if</span> i &lt; <span class="hljs-built_in">len</span>(p) {
+				theirAction := p[i]
+				<span class="hljs-keyword">switch</span> theirAction {
+				<span class="hljs-keyword">case</span> <span class="hljs-string">'R'</span>:
+					<span class="hljs-built_in">delete</span>(myActionCanBe, <span class="hljs-string">'S'</span>)
+				<span class="hljs-keyword">case</span> <span class="hljs-string">'P'</span>:
+					<span class="hljs-built_in">delete</span>(myActionCanBe, <span class="hljs-string">'R'</span>)
+				<span class="hljs-keyword">case</span> <span class="hljs-string">'S'</span>:
+					<span class="hljs-built_in">delete</span>(myActionCanBe, <span class="hljs-string">'P'</span>)
+				<span class="hljs-keyword">default</span>:
+					<span class="hljs-built_in">panic</span>(theirAction)
+				}
+			}
+		}
+		<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(myActionCanBe) == <span class="hljs-number">0</span> {
+			stdout.WriteString(<span class="hljs-string">"IMPOSSIBLE\n"</span>)
+			<span class="hljs-keyword">return</span>
+		} <span class="hljs-keyword">else</span> {
+			myAct := <span class="hljs-keyword">byte</span>(<span class="hljs-string">'_'</span>)
+			<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(myActionCanBe) == <span class="hljs-number">1</span> {
+				<span class="hljs-keyword">for</span> act, _ := <span class="hljs-keyword">range</span> myActionCanBe {
+					myAct = act
+					<span class="hljs-keyword">break</span>
+				}
+				myProg[i] = myAct
+				<span class="hljs-keyword">for</span> opponent, theirProg := <span class="hljs-keyword">range</span> otherPrograms {
+					<span class="hljs-keyword">if</span> defeated[opponent] {
+						<span class="hljs-keyword">continue</span>
+					}
+					<span class="hljs-keyword">if</span> theirProg[i%<span class="hljs-built_in">len</span>(theirProg)] != myAct {
+						defeated[opponent] = <span class="hljs-literal">true</span>
+					}
+				}
+			}
+		}
+	}
+	defeatedAll := <span class="hljs-literal">true</span>
+	<span class="hljs-keyword">for</span> _, d := <span class="hljs-keyword">range</span> defeated {
+		<span class="hljs-keyword">if</span> !d {
+			defeatedAll = <span class="hljs-literal">false</span>
+			<span class="hljs-keyword">break</span>
+		}
+	}
+	<span class="hljs-keyword">if</span> !defeatedAll {
+		stdout.WriteString(<span class="hljs-string">"IMPOSSIBLE\n"</span>)
+	} <span class="hljs-keyword">else</span> {
+		stdout.Write(myProg)
+		stdout.WriteByte(<span class="hljs-string">'\n'</span>)
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h3>wrong-2</h3><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/wrong-2/cmd.go" target="_blank">wrong-2/cmd.go</a>:</div><a class="download" href="files/wrong-2/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1C/1/wrong-2/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> A <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;A)
+	otherPrograms := <span class="hljs-built_in">make</span>([][]<span class="hljs-keyword">byte</span>, A)
+	maxLen := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; A; i++ {
+		otherPrograms[i] = []<span class="hljs-keyword">byte</span>(mustReadLine())
+		<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(otherPrograms[i]) &gt; maxLen {
+			maxLen = <span class="hljs-built_in">len</span>(otherPrograms[i])
+		}
+	}
+	myProg := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, maxLen)
+	check := <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(upTo <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">int8</span></span> {
+		defeated := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">bool</span>, A)
+		<span class="hljs-keyword">for</span> ps := <span class="hljs-number">0</span>; ps &lt;= upTo; ps++ {
+			allDefeated := <span class="hljs-literal">true</span>
+			<span class="hljs-keyword">for</span> op := <span class="hljs-number">0</span>; op &lt; A; op++ {
+				<span class="hljs-keyword">if</span> defeated[op] {
+					<span class="hljs-keyword">continue</span>
+				}
+				opProg := otherPrograms[op]
+				opAct := opProg[ps%<span class="hljs-built_in">len</span>(opProg)]
+				myAct := myProg[ps]
+				<span class="hljs-keyword">switch</span> myAct {
+				<span class="hljs-keyword">case</span> <span class="hljs-string">'R'</span>:
+					<span class="hljs-keyword">if</span> opAct == <span class="hljs-string">'P'</span> {
+						<span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>
+					} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> opAct == <span class="hljs-string">'S'</span> {
+						defeated[op] = <span class="hljs-literal">true</span>
+					}
+				<span class="hljs-keyword">case</span> <span class="hljs-string">'P'</span>:
+					<span class="hljs-keyword">if</span> opAct == <span class="hljs-string">'S'</span> {
+						<span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>
+					} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> opAct == <span class="hljs-string">'R'</span> {
+						defeated[op] = <span class="hljs-literal">true</span>
+					}
+				<span class="hljs-keyword">case</span> <span class="hljs-string">'S'</span>:
+					<span class="hljs-keyword">if</span> opAct == <span class="hljs-string">'R'</span> {
+						<span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>
+					} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> opAct == <span class="hljs-string">'P'</span> {
+						defeated[op] = <span class="hljs-literal">true</span>
+					}
+				}
+				<span class="hljs-keyword">if</span> !defeated[op] {
+					allDefeated = <span class="hljs-literal">false</span>
+				}
+			}
+			<span class="hljs-keyword">if</span> allDefeated {
+				<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>
+			}
+		}
+		<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+	}
+	<span class="hljs-keyword">var</span> search <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(currentUpTo <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span>
+	search = <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(currentUpTo <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+		<span class="hljs-keyword">if</span> currentUpTo == maxLen {
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+		}
+		toTry := []<span class="hljs-keyword">byte</span>{<span class="hljs-string">'R'</span>, <span class="hljs-string">'P'</span>, <span class="hljs-string">'S'</span>}
+		<span class="hljs-keyword">for</span> _, try := <span class="hljs-keyword">range</span> toTry {
+			myProg[currentUpTo] = try
+			ck := check(currentUpTo)
+			<span class="hljs-keyword">if</span> ck == <span class="hljs-number">1</span> {
+				maxLen = currentUpTo + <span class="hljs-number">1</span>
+				<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+			} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> ck == <span class="hljs-number">-1</span> {
+				<span class="hljs-keyword">continue</span>
+			} <span class="hljs-keyword">else</span> {
+				<span class="hljs-keyword">if</span> search(currentUpTo + <span class="hljs-number">1</span>) {
+					<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+				} <span class="hljs-comment">// else continue</span>
+			}
+		}
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+	}
+	<span class="hljs-keyword">if</span> search(<span class="hljs-number">0</span>) {
+		stdout.Write(myProg[:maxLen])
+		stdout.WriteByte(<span class="hljs-string">'\n'</span>)
+	} <span class="hljs-keyword">else</span> {
+		stdout.WriteString(<span class="hljs-string">"IMPOSSIBLE\n"</span>)
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/problem.in" target="_blank">problem.in</a>:</div><a class="download" href="files/problem.in" title="Download original" download="problem.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1C/1/problem.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">1
+3
+P
+R
+R
+</code></pre><h2>Solution that only works for the small input</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/small/cmd.go" target="_blank">small/cmd.go</a>:</div><a class="download" href="files/small/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1C/1/small/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> A <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;A)
+	otherProgs := <span class="hljs-built_in">make</span>([][]<span class="hljs-keyword">byte</span>, A)
+	maxLen := A
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; A; i++ {
+		otherProgs[i] = []<span class="hljs-keyword">byte</span>(mustReadLine())
+	}
+	myProg := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">uint8</span>, maxLen)
+	options := []<span class="hljs-keyword">byte</span>{<span class="hljs-string">'R'</span>, <span class="hljs-string">'S'</span>, <span class="hljs-string">'P'</span>}
+	<span class="hljs-keyword">for</span> {
+		won := <span class="hljs-literal">true</span>
+	a:
+		<span class="hljs-keyword">for</span> _, opponent := <span class="hljs-keyword">range</span> otherProgs {
+			<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; maxLen; i++ {
+				oppAction := opponent[i%<span class="hljs-built_in">len</span>(opponent)]
+				myAction := options[myProg[i]]
+				res := round(myAction, oppAction)
+				<span class="hljs-keyword">if</span> res == <span class="hljs-number">1</span> {
+					<span class="hljs-keyword">break</span>
+				}
+				<span class="hljs-keyword">if</span> res == <span class="hljs-number">-1</span> {
+					won = <span class="hljs-literal">false</span>
+					<span class="hljs-keyword">break</span> a
+				}
+				<span class="hljs-keyword">if</span> res == <span class="hljs-number">0</span> &amp;&amp; i == maxLen<span class="hljs-number">-1</span> {
+					won = <span class="hljs-literal">false</span>
+					<span class="hljs-keyword">break</span> a
+				}
+			}
+		}
+		<span class="hljs-keyword">if</span> won {
+			<span class="hljs-keyword">for</span> _, i := <span class="hljs-keyword">range</span> myProg {
+				stdout.WriteByte(options[i])
+			}
+			stdout.WriteByte(<span class="hljs-string">'\n'</span>)
+			<span class="hljs-keyword">return</span>
+		} <span class="hljs-keyword">else</span> {
+			<span class="hljs-comment">// try next</span>
+			ptr := maxLen - <span class="hljs-number">1</span>
+			<span class="hljs-keyword">for</span> {
+				<span class="hljs-keyword">if</span> myProg[ptr]+<span class="hljs-number">1</span> &gt;= <span class="hljs-number">3</span> {
+					myProg[ptr] = <span class="hljs-number">0</span>
+					ptr--
+					<span class="hljs-keyword">if</span> ptr &lt; <span class="hljs-number">0</span> {
+						stdout.WriteString(<span class="hljs-string">"IMPOSSIBLE\n"</span>)
+						<span class="hljs-keyword">return</span>
+					}
+				} <span class="hljs-keyword">else</span> {
+					myProg[ptr]++
+					<span class="hljs-keyword">break</span>
+				}
+			}
+		}
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">round</span><span class="hljs-params">(my, other <span class="hljs-keyword">byte</span>)</span> <span class="hljs-title">int8</span></span> {
+	<span class="hljs-keyword">switch</span> my {
+	<span class="hljs-keyword">case</span> <span class="hljs-string">'R'</span>:
+		<span class="hljs-keyword">if</span> other == <span class="hljs-string">'P'</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>
+		} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> other == <span class="hljs-string">'S'</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>
+		}
+	<span class="hljs-keyword">case</span> <span class="hljs-string">'P'</span>:
+		<span class="hljs-keyword">if</span> other == <span class="hljs-string">'S'</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>
+		} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> other == <span class="hljs-string">'R'</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>
+		}
+	<span class="hljs-keyword">case</span> <span class="hljs-string">'S'</span>:
+		<span class="hljs-keyword">if</span> other == <span class="hljs-string">'R'</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>
+		} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> other == <span class="hljs-string">'P'</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>
+		}
+	<span class="hljs-keyword">default</span>:
+		<span class="hljs-built_in">panic</span>(<span class="hljs-string">"!"</span>)
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1C/1/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">3
+1
+RS
+3
+R
+P
+S
+7
+RS
+RS
+RS
+RS
+RS
+RS
+RS
+</code></pre><h2>Other files</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/problem.out" target="_blank">problem.out</a>:</div><a class="download" href="files/problem.out" title="Download original" download="problem.out">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1C/1/problem.out" target="_blank">open on GitHub</a></div><pre><code class="hljs">Case #1: PS
+</code></pre><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sketch.in" target="_blank">sketch.in</a>:</div><a class="download" href="files/sketch.in" title="Download original" download="sketch.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1C/1/sketch.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">2
+2
+RS
+PRP
+2
+RP
+PRP
+</code></pre><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sketch.out" target="_blank">sketch.out</a>:</div><a class="download" href="files/sketch.out" title="Download original" download="sketch.out">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1C/1/sketch.out" target="_blank">open on GitHub</a></div><pre><code class="hljs">Case #1: PP
+</code></pre></body></html>

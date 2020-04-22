@@ -1,0 +1,126 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2019-1A Problem A - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2019-1A Problem A</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1A/1/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> t <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;t)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; t; i++ {
+		fmt.Fprintf(stdout, <span class="hljs-string">"Case #%d: "</span>, i+<span class="hljs-number">1</span>)
+		<span class="hljs-keyword">var</span> R, C <span class="hljs-keyword">int</span>
+		mustReadLineOfInts(&amp;R, &amp;C)
+		test(R, C)
+	}
+}
+
+<span class="hljs-keyword">type</span> Point <span class="hljs-keyword">struct</span> {
+	r, c <span class="hljs-keyword">int</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">printGrid</span><span class="hljs-params">(grid [][]<span class="hljs-keyword">bool</span>)</span></span> {
+	<span class="hljs-keyword">return</span>
+	<span class="hljs-comment">// stderr := os.Stderr</span>
+	<span class="hljs-comment">// stderr.WriteString("\033[s\n")</span>
+	<span class="hljs-comment">// for r := 0; r &lt; len(grid); r++ {</span>
+	<span class="hljs-comment">// 	for c := 0; c &lt; len(grid[r]); c++ {</span>
+	<span class="hljs-comment">// 		if grid[r][c] {</span>
+	<span class="hljs-comment">// 			stderr.Write([]byte{'*'})</span>
+	<span class="hljs-comment">// 		} else {</span>
+	<span class="hljs-comment">// 			stderr.Write([]byte{' '})</span>
+	<span class="hljs-comment">// 		}</span>
+	<span class="hljs-comment">// 	}</span>
+	<span class="hljs-comment">// 	stderr.Write([]byte{'\n'})</span>
+	<span class="hljs-comment">// }</span>
+	<span class="hljs-comment">// stderr.WriteString("\033[u")</span>
+	<span class="hljs-comment">// time.Sleep(50 * time.Millisecond)</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">findPath</span><span class="hljs-params">(grid [][]<span class="hljs-keyword">bool</span>, trail []Point, trailLen <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+	printGrid(grid)
+	R := <span class="hljs-built_in">len</span>(grid)
+	C := <span class="hljs-built_in">len</span>(grid[<span class="hljs-number">0</span>])
+	<span class="hljs-keyword">if</span> trailLen == R*C {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+	}
+	candidatePoints := <span class="hljs-built_in">make</span>([]Point, <span class="hljs-number">0</span>)
+	<span class="hljs-keyword">for</span> r := <span class="hljs-number">0</span>; r &lt; R; r++ {
+		<span class="hljs-keyword">for</span> c := <span class="hljs-number">0</span>; c &lt; C; c++ {
+			<span class="hljs-keyword">if</span> grid[r][c] {
+				<span class="hljs-keyword">continue</span>
+			}
+			<span class="hljs-keyword">if</span> trailLen == <span class="hljs-number">0</span> {
+				candidatePoints = <span class="hljs-built_in">append</span>(candidatePoints, Point{r, c})
+			} <span class="hljs-keyword">else</span> {
+				lastPoint := trail[trailLen<span class="hljs-number">-1</span>]
+				assert(grid[lastPoint.r][lastPoint.c])
+				<span class="hljs-keyword">if</span> lastPoint.r == r {
+					<span class="hljs-keyword">break</span> <span class="hljs-comment">// skip this row</span>
+				}
+				<span class="hljs-keyword">if</span> lastPoint.c == c {
+					<span class="hljs-keyword">continue</span>
+				}
+				<span class="hljs-keyword">if</span> lastPoint.r-lastPoint.c == r-c || lastPoint.r+lastPoint.c == r+c {
+					<span class="hljs-keyword">continue</span>
+				}
+				candidatePoints = <span class="hljs-built_in">append</span>(candidatePoints, Point{r, c})
+			}
+		}
+	}
+	<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(candidatePoints) == <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+	} <span class="hljs-keyword">else</span> {
+		shufflePoints(candidatePoints)
+		<span class="hljs-keyword">for</span> _, cp := <span class="hljs-keyword">range</span> candidatePoints {
+			grid[cp.r][cp.c] = <span class="hljs-literal">true</span>
+			trail[trailLen] = Point{cp.r, cp.c}
+			ok := findPath(grid, trail, trailLen+<span class="hljs-number">1</span>)
+			<span class="hljs-keyword">if</span> !ok {
+				grid[cp.r][cp.c] = <span class="hljs-literal">false</span>
+				<span class="hljs-keyword">continue</span>
+			}
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+		}
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+	}
+}
+
+<span class="hljs-comment">// CJ's runner runs go 1.7.4</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">shufflePoints</span><span class="hljs-params">(ps []Point)</span></span> {
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(ps)<span class="hljs-number">-1</span>; i++ {
+		j := rand.Intn(<span class="hljs-built_in">len</span>(ps)-i) + i
+		ps[i], ps[j] = ps[j], ps[i]
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">(R, C <span class="hljs-keyword">int</span>)</span></span> {
+	<span class="hljs-keyword">if</span> R &lt;= <span class="hljs-number">2</span> &amp;&amp; C &lt;= <span class="hljs-number">2</span> {
+		output(<span class="hljs-literal">false</span>)
+		<span class="hljs-keyword">return</span>
+	}
+	grid := <span class="hljs-built_in">make</span>([][]<span class="hljs-keyword">bool</span>, R)
+	<span class="hljs-keyword">for</span> r := <span class="hljs-number">0</span>; r &lt; R; r++ {
+		grid[r] = <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">bool</span>, C)
+	}
+	trail := <span class="hljs-built_in">make</span>([]Point, R*C)
+	ok := findPath(grid, trail, <span class="hljs-number">0</span>)
+	printGrid(grid)
+	output(ok)
+	<span class="hljs-keyword">if</span> ok {
+		<span class="hljs-keyword">for</span> _, r := <span class="hljs-keyword">range</span> trail {
+			fmt.Fprintf(stdout, <span class="hljs-string">"%d %d\n"</span>, r.r+<span class="hljs-number">1</span>, r.c+<span class="hljs-number">1</span>)
+		}
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">output</span><span class="hljs-params">(possible <span class="hljs-keyword">bool</span>)</span></span> {
+	<span class="hljs-keyword">if</span> possible {
+		stdout.WriteString(<span class="hljs-string">"POSSIBLE\n"</span>)
+	} <span class="hljs-keyword">else</span> {
+		stdout.WriteString(<span class="hljs-string">"IMPOSSIBLE\n"</span>)
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1A/1/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">3
+2 2
+2 5
+20 20
+</code></pre></body></html>

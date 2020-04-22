@@ -1,0 +1,166 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2016-1B Problem B - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2016-1B Problem B</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1B/2/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-keyword">type</span> CJ <span class="hljs-keyword">struct</span> {
+	C, J []<span class="hljs-keyword">byte</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">rank</span><span class="hljs-params">(a, b *CJ)</span> *<span class="hljs-title">CJ</span></span> {
+	<span class="hljs-keyword">if</span> a == <span class="hljs-literal">nil</span> {
+		<span class="hljs-keyword">return</span> b
+	}
+	<span class="hljs-keyword">if</span> b == <span class="hljs-literal">nil</span> {
+		<span class="hljs-keyword">return</span> a
+	}
+	aC, ok := big.NewInt(<span class="hljs-number">0</span>).SetString(<span class="hljs-keyword">string</span>(a.C), <span class="hljs-number">10</span>)
+	assert(ok)
+	aJ, ok := big.NewInt(<span class="hljs-number">0</span>).SetString(<span class="hljs-keyword">string</span>(a.J), <span class="hljs-number">10</span>)
+	assert(ok)
+	bC, ok := big.NewInt(<span class="hljs-number">0</span>).SetString(<span class="hljs-keyword">string</span>(b.C), <span class="hljs-number">10</span>)
+	assert(ok)
+	bJ, ok := big.NewInt(<span class="hljs-number">0</span>).SetString(<span class="hljs-keyword">string</span>(b.J), <span class="hljs-number">10</span>)
+	assert(ok)
+	diffA := big.NewInt(<span class="hljs-number">0</span>).Sub(aC, aJ)
+	diffB := big.NewInt(<span class="hljs-number">0</span>).Sub(bC, bJ)
+	cmpAbs := diffA.CmpAbs(diffB)
+	<span class="hljs-keyword">if</span> cmpAbs &lt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> a
+	} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> cmpAbs &gt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> b
+	}
+	cmpC := aC.Cmp(bC)
+	<span class="hljs-keyword">if</span> cmpC &lt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> a
+	} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> cmpC &gt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> b
+	}
+	<span class="hljs-keyword">if</span> aJ.Cmp(bJ) &lt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> a
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> b
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">assumeAndGoOn</span><span class="hljs-params">(pos <span class="hljs-keyword">int</span>, C, J []<span class="hljs-keyword">byte</span>, cmp <span class="hljs-keyword">int8</span>)</span> *<span class="hljs-title">CJ</span></span> {
+	nC := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, <span class="hljs-built_in">len</span>(C))
+	nJ := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, <span class="hljs-built_in">len</span>(J))
+	<span class="hljs-built_in">copy</span>(nC, C)
+	<span class="hljs-built_in">copy</span>(nJ, J)
+	C = nC
+	J = nJ
+	N := <span class="hljs-built_in">len</span>(C)
+	<span class="hljs-keyword">if</span> cmp == <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">for</span> ; pos &lt; N; pos++ {
+			<span class="hljs-keyword">if</span> C[pos] == <span class="hljs-string">'?'</span> &amp;&amp; J[pos] == <span class="hljs-string">'?'</span> {
+				C[pos] = <span class="hljs-string">'0'</span>
+				J[pos] = <span class="hljs-string">'0'</span>
+			} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> C[pos] == <span class="hljs-string">'?'</span> &amp;&amp; J[pos] != <span class="hljs-string">'?'</span> {
+				C[pos] = J[pos]
+			} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> C[pos] != <span class="hljs-string">'?'</span> &amp;&amp; J[pos] == <span class="hljs-string">'?'</span> {
+				J[pos] = C[pos]
+			}
+		}
+		<span class="hljs-keyword">return</span> &amp;CJ{C, J}
+	} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> cmp &lt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">for</span> ; pos &lt; N; pos++ {
+			<span class="hljs-keyword">if</span> C[pos] == <span class="hljs-string">'?'</span> {
+				C[pos] = <span class="hljs-string">'9'</span>
+			}
+			<span class="hljs-keyword">if</span> J[pos] == <span class="hljs-string">'?'</span> {
+				J[pos] = <span class="hljs-string">'0'</span>
+			}
+		}
+		<span class="hljs-keyword">return</span> &amp;CJ{C, J}
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">for</span> ; pos &lt; N; pos++ {
+			<span class="hljs-keyword">if</span> C[pos] == <span class="hljs-string">'?'</span> {
+				C[pos] = <span class="hljs-string">'0'</span>
+			}
+			<span class="hljs-keyword">if</span> J[pos] == <span class="hljs-string">'?'</span> {
+				J[pos] = <span class="hljs-string">'9'</span>
+			}
+		}
+		<span class="hljs-keyword">return</span> &amp;CJ{C, J}
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	line := strings.Split(mustReadLine(), <span class="hljs-string">" "</span>)
+	assert(<span class="hljs-built_in">len</span>(line) == <span class="hljs-number">2</span>)
+	C := []<span class="hljs-keyword">byte</span>(line[<span class="hljs-number">0</span>])
+	J := []<span class="hljs-keyword">byte</span>(line[<span class="hljs-number">1</span>])
+	assert(<span class="hljs-built_in">len</span>(C) == <span class="hljs-built_in">len</span>(J))
+	N := <span class="hljs-built_in">len</span>(C)
+	<span class="hljs-keyword">var</span> best *CJ = <span class="hljs-literal">nil</span>
+	notEqual := <span class="hljs-literal">false</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i++ {
+		<span class="hljs-keyword">if</span> C[i] == J[i] &amp;&amp; C[i] != <span class="hljs-string">'?'</span> {
+			<span class="hljs-keyword">continue</span>
+		}
+		<span class="hljs-keyword">if</span> C[i] != <span class="hljs-string">'?'</span> &amp;&amp; J[i] != <span class="hljs-string">'?'</span> {
+			notEqual = <span class="hljs-literal">true</span>
+			cmp := <span class="hljs-keyword">int8</span>(<span class="hljs-number">0</span>)
+			<span class="hljs-keyword">if</span> C[i] &lt; J[i] {
+				cmp = <span class="hljs-number">-1</span>
+			} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> C[i] &gt; J[i] {
+				cmp = <span class="hljs-number">1</span>
+			}
+			best = rank(best, assumeAndGoOn(i+<span class="hljs-number">1</span>, C, J, cmp))
+			<span class="hljs-keyword">break</span>
+		} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> C[i] != <span class="hljs-string">'?'</span> &amp;&amp; J[i] == <span class="hljs-string">'?'</span> {
+			<span class="hljs-keyword">if</span> C[i] &gt; <span class="hljs-string">'0'</span> {
+				J[i] = C[i] - <span class="hljs-number">1</span>
+				best = rank(best, assumeAndGoOn(i+<span class="hljs-number">1</span>, C, J, <span class="hljs-number">1</span>))
+			}
+			<span class="hljs-keyword">if</span> C[i] &lt; <span class="hljs-string">'9'</span> {
+				J[i] = C[i] + <span class="hljs-number">1</span>
+				best = rank(best, assumeAndGoOn(i+<span class="hljs-number">1</span>, C, J, <span class="hljs-number">-1</span>))
+			}
+			J[i] = C[i]
+			<span class="hljs-keyword">continue</span>
+		} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> C[i] == <span class="hljs-string">'?'</span> &amp;&amp; J[i] != <span class="hljs-string">'?'</span> {
+			<span class="hljs-keyword">if</span> J[i] &gt; <span class="hljs-string">'0'</span> {
+				C[i] = J[i] - <span class="hljs-number">1</span>
+				best = rank(best, assumeAndGoOn(i+<span class="hljs-number">1</span>, C, J, <span class="hljs-number">-1</span>))
+			}
+			<span class="hljs-keyword">if</span> J[i] &lt; <span class="hljs-string">'9'</span> {
+				C[i] = J[i] + <span class="hljs-number">1</span>
+				best = rank(best, assumeAndGoOn(i+<span class="hljs-number">1</span>, C, J, <span class="hljs-number">1</span>))
+			}
+			C[i] = J[i]
+			<span class="hljs-keyword">continue</span>
+		} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> C[i] == <span class="hljs-string">'?'</span> &amp;&amp; J[i] == <span class="hljs-string">'?'</span> {
+			C[i] = <span class="hljs-string">'1'</span>
+			J[i] = <span class="hljs-string">'0'</span>
+			best = rank(best, assumeAndGoOn(i+<span class="hljs-number">1</span>, C, J, <span class="hljs-number">1</span>))
+			C[i] = <span class="hljs-string">'0'</span>
+			J[i] = <span class="hljs-string">'1'</span>
+			best = rank(best, assumeAndGoOn(i+<span class="hljs-number">1</span>, C, J, <span class="hljs-number">-1</span>))
+			C[i] = <span class="hljs-string">'0'</span>
+			J[i] = <span class="hljs-string">'0'</span>
+			<span class="hljs-keyword">continue</span>
+		}
+		<span class="hljs-built_in">panic</span>(<span class="hljs-string">"Uncovered case!"</span>)
+	}
+	<span class="hljs-keyword">if</span> !notEqual {
+		best = rank(best, &amp;CJ{C, J})
+	}
+	stdout.Write(best.C)
+	stdout.WriteByte(<span class="hljs-string">' '</span>)
+	stdout.Write(best.J)
+	stdout.WriteByte(<span class="hljs-string">'\n'</span>)
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1B/2/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">4
+1? 2?
+?2? ??3
+? ?
+?5 ?0</code></pre><h2>Other files</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/problem.in" target="_blank">problem.in</a>:</div><a class="download" href="files/problem.in" title="Download original" download="problem.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1B/2/problem.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">2
+1? 20
+?0? ?9?
+</code></pre><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/problem.out" target="_blank">problem.out</a>:</div><a class="download" href="files/problem.out" title="Download original" download="problem.out">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1B/2/problem.out" target="_blank">open on GitHub</a></div><pre><code class="hljs">Case #1: 19 20
+Case #2: 100 099
+</code></pre></body></html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2017-1A Problem C - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2017-1A Problem C</h1><h2>Solution that only works for the small input</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/small/cmd.go" target="_blank">small/cmd.go</a>:</div><a class="download" href="files/small/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1A/3/small/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> t <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;t)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; t; i++ {
+		fmt.Fprintf(stdout, <span class="hljs-string">"Case #%d: "</span>, i+<span class="hljs-number">1</span>)
+		debug(fmt.Sprintf(<span class="hljs-string">"Processing case %d"</span>, i+<span class="hljs-number">1</span>))
+		best := test()
+		<span class="hljs-keyword">if</span> best &gt;= <span class="hljs-number">0</span> {
+			fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, best)
+		} <span class="hljs-keyword">else</span> {
+			stdout.WriteString(<span class="hljs-string">"IMPOSSIBLE\n"</span>)
+		}
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">var</span> Hd, Ad, Hk, Ak, B, D <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;Hd, &amp;Ad, &amp;Hk, &amp;Ak, &amp;B, &amp;D)
+	best := <span class="hljs-number">-1</span>
+	maxDebuff := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">if</span> D != <span class="hljs-number">0</span> {
+		maxDebuff = Ak/D + <span class="hljs-number">1</span>
+	}
+	currentT := <span class="hljs-number">0</span>
+	currentDebuff := <span class="hljs-number">0</span>
+	currentHealth := Hd
+	lastActionIsCure := <span class="hljs-literal">false</span>
+
+	<span class="hljs-comment">// This part calculates the minimum amount of attack and cures needed to defeat the knight, not counting cures.</span>
+	<span class="hljs-comment">// It is independent of D or Hd.</span>
+	tBA, buff := optimizeBA(Hk, Ad, B)
+	debug(fmt.Sprintf(<span class="hljs-string">"tBA = %v"</span>, tBA))
+	assert(tBA &gt; buff)
+
+	<span class="hljs-comment">// Try every possible amount of debuff.</span>
+	<span class="hljs-keyword">for</span> currentDebuff &lt;= maxDebuff {
+		<span class="hljs-comment">// For each amount of debuff, simulate what amount of attacks, buffs and cures is needed, maintaining a global minimum `best`.</span>
+		debug(fmt.Sprintf(<span class="hljs-string">"currentDebuff = %v, currentHealth = %v"</span>, currentDebuff, currentHealth))
+
+		<span class="hljs-comment">// This is the cures needed for the attack stage.</span>
+		<span class="hljs-comment">// Cures needed in the debuff stage are added directly onto currentT.</span>
+		cureNeeded := <span class="hljs-number">0</span>
+		impossible := <span class="hljs-literal">false</span>
+		lastActionIsCure = <span class="hljs-literal">false</span>
+		<span class="hljs-comment">// Once we finish simulating this choice of debuff, we need to restore the health value.</span>
+		healthBeforeBA := currentHealth
+
+		<span class="hljs-comment">// Simulate attacks (adding cures when necessary), except for the last attack, which don't need to be followed by a cure.</span>
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; tBA<span class="hljs-number">-1</span>; {
+			<span class="hljs-comment">// If we attacked/buffed, than...</span>
+			healthAfterThis := currentHealth - attack(Ak, currentDebuff, D)
+			<span class="hljs-keyword">if</span> healthAfterThis &lt;= <span class="hljs-number">0</span> {
+				<span class="hljs-comment">// Maybe we shouldn't had attacked/buffed, but cured instead.</span>
+				<span class="hljs-keyword">if</span> lastActionIsCure {
+					impossible = <span class="hljs-literal">true</span>
+					<span class="hljs-keyword">break</span>
+				} <span class="hljs-keyword">else</span> {
+					lastActionIsCure = <span class="hljs-literal">true</span>
+					cureNeeded++
+					currentHealth = Hd - attack(Ak, currentDebuff, D) <span class="hljs-comment">// Knight will attack us after we cured.</span>
+					<span class="hljs-keyword">if</span> currentHealth &lt; <span class="hljs-number">0</span> {
+						impossible = <span class="hljs-literal">true</span>
+						<span class="hljs-keyword">break</span> <span class="hljs-comment">// This debuff amount isn't going to work.</span>
+					}
+				}
+			} <span class="hljs-keyword">else</span> {
+				lastActionIsCure = <span class="hljs-literal">false</span>
+				currentHealth = healthAfterThis
+				i++
+			}
+		}
+
+		<span class="hljs-comment">// One last attack here kills the knight, which is counted in tBA</span>
+
+		<span class="hljs-keyword">if</span> impossible {
+			currentHealth = healthBeforeBA
+			<span class="hljs-keyword">if</span> currentHealth-attack(Ak, currentDebuff+<span class="hljs-number">1</span>, D) &gt;= <span class="hljs-number">0</span> {
+				<span class="hljs-comment">// We can add one more debuff and survive.</span>
+				<span class="hljs-comment">// Not curing here would be safe, since we can cure later if needed</span>
+				currentT++
+				currentDebuff++
+				currentHealth = currentHealth - attack(Ak, currentDebuff, D)
+				<span class="hljs-keyword">continue</span>
+			} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> Hd-attack(Ak, currentDebuff, D)-attack(Ak, currentDebuff+<span class="hljs-number">1</span>, D) &lt;= <span class="hljs-number">0</span> { <span class="hljs-comment">// if cure (and be attacked) and debuff (and be attacked) still result in death, than all further debuff trials will result in IMPOSSIBLE result.</span>
+				<span class="hljs-keyword">break</span>
+			} <span class="hljs-keyword">else</span> {
+				<span class="hljs-comment">// cure</span>
+				currentT++
+				currentHealth = Hd - attack(Ak, currentDebuff, D)
+				currentDebuff++
+				currentT++
+				currentHealth -= attack(Ak, currentDebuff, D)
+				<span class="hljs-keyword">continue</span>
+			}
+		}
+		thisTurnNumber := currentT + tBA + cureNeeded
+		debug(fmt.Sprintf(<span class="hljs-string">"thisTurnNumber = %d"</span>, thisTurnNumber))
+		<span class="hljs-keyword">if</span> best &gt; thisTurnNumber || best == <span class="hljs-number">-1</span> {
+			best = thisTurnNumber
+		}
+
+		<span class="hljs-comment">// Try adding more debuff</span>
+		currentHealth = healthBeforeBA
+		currentDebuff++
+		currentT++
+		<span class="hljs-keyword">if</span> currentHealth-attack(Ak, currentDebuff, D) &lt;= <span class="hljs-number">0</span> {
+			currentT--
+			currentDebuff--
+			<span class="hljs-keyword">if</span> Hd-attack(Ak, currentDebuff, D) &lt;= <span class="hljs-number">0</span> {
+				<span class="hljs-keyword">break</span> <span class="hljs-comment">// impossible from now on</span>
+			} <span class="hljs-keyword">else</span> {
+				<span class="hljs-comment">// Cure</span>
+				currentT++
+				currentHealth = Hd - attack(Ak, currentDebuff, D)
+				<span class="hljs-comment">// Debuff</span>
+				currentT++
+				currentDebuff++
+				currentHealth -= attack(Ak, currentDebuff, D)
+				<span class="hljs-keyword">if</span> currentHealth &lt;= <span class="hljs-number">0</span> {
+					<span class="hljs-keyword">break</span>
+				}
+			}
+		} <span class="hljs-keyword">else</span> {
+			currentHealth -= attack(Ak, currentDebuff, D)
+			<span class="hljs-comment">// I initially forgot to write this else branch, which caused a lot of hard-to-debug incorrect answers and much frustration.</span>
+		}
+	}
+	<span class="hljs-keyword">return</span> best
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">attack</span><span class="hljs-params">(Ak, currentDebuff, D <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">if</span> currentDebuff*D &gt;= Ak {
+		<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> Ak - currentDebuff*D
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">optimizeBA</span><span class="hljs-params">(Hk, Ad, B <span class="hljs-keyword">int</span>)</span> <span class="hljs-params">(tBA, buff <span class="hljs-keyword">int</span>)</span></span> {
+	<span class="hljs-keyword">if</span> B == <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-keyword">int</span>(math.Ceil(<span class="hljs-keyword">float64</span>(Hk) / <span class="hljs-keyword">float64</span>(Ad))), <span class="hljs-number">0</span>
+	}
+	b := sort.Search(Hk/B+<span class="hljs-number">1</span>, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(b <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+		thisB := b + <span class="hljs-keyword">int</span>(math.Ceil(<span class="hljs-keyword">float64</span>(Hk)/<span class="hljs-keyword">float64</span>(Ad+B*b)))
+		nextB := b + <span class="hljs-number">1</span> + <span class="hljs-keyword">int</span>(math.Ceil(<span class="hljs-keyword">float64</span>(Hk)/<span class="hljs-keyword">float64</span>(Ad+B*(b+<span class="hljs-number">1</span>))))
+		<span class="hljs-keyword">return</span> nextB &gt;= thisB
+	})
+	debug(fmt.Sprintf(<span class="hljs-string">"b = %d"</span>, b))
+	<span class="hljs-keyword">return</span> b + <span class="hljs-keyword">int</span>(math.Ceil(<span class="hljs-keyword">float64</span>(Hk)/<span class="hljs-keyword">float64</span>(Ad+B*b))), b
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/small-2/cmd.go" target="_blank">small-2/cmd.go</a>:</div><a class="download" href="files/small-2/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1A/3/small-2/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> t <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;t)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; t; i++ {
+		fmt.Fprintf(stdout, <span class="hljs-string">"Case #%d: "</span>, i+<span class="hljs-number">1</span>)
+		debug(fmt.Sprintf(<span class="hljs-string">"Processing case %d"</span>, i+<span class="hljs-number">1</span>))
+		best := test()
+		<span class="hljs-keyword">if</span> best &gt;= <span class="hljs-number">0</span> {
+			fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, best)
+		} <span class="hljs-keyword">else</span> {
+			stdout.WriteString(<span class="hljs-string">"IMPOSSIBLE\n"</span>)
+		}
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">var</span> Hd, Ad, Hk, Ak, B, D <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;Hd, &amp;Ad, &amp;Hk, &amp;Ak, &amp;B, &amp;D)
+	best := <span class="hljs-number">-1</span>
+	maxDebuff := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">if</span> D != <span class="hljs-number">0</span> {
+		maxDebuff = Ak/D + <span class="hljs-number">1</span>
+	}
+	currentT := <span class="hljs-number">0</span>
+	currentDebuff := <span class="hljs-number">0</span>
+	currentHealth := Hd
+	lastActionIsCure := <span class="hljs-literal">false</span>
+
+	<span class="hljs-comment">// This part calculates the minimum amount of attack and cures needed to defeat the knight, not counting cures.</span>
+	<span class="hljs-comment">// It is independent of D or Hd.</span>
+	tBA, buff := optimizeBA(Hk, Ad, B)
+	<span class="hljs-comment">// debug(fmt.Sprintf("tBA = %v", tBA))</span>
+	assert(tBA &gt; buff)
+
+	<span class="hljs-comment">// Try every possible amount of debuff.</span>
+	<span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> work out a formula for the curePeriod below, which the analysis didn't give, and ignore all but the first</span>
+	<span class="hljs-comment">// currentDebuff with the same curePeriod.</span>
+	<span class="hljs-keyword">for</span> currentDebuff &lt;= maxDebuff {
+		<span class="hljs-keyword">if</span> currentDebuff%<span class="hljs-number">1e7</span> == <span class="hljs-number">0</span> {
+			debug(fmt.Sprintf(<span class="hljs-string">"%v"</span>, currentDebuff))
+		}
+		<span class="hljs-comment">// For each amount of debuff, simulate what amount of attacks, buffs and cures is needed, maintaining a global minimum</span>
+		<span class="hljs-comment">// `best`.</span>
+		<span class="hljs-comment">// debug(fmt.Sprintf("currentDebuff = %v, currentHealth = %v", currentDebuff, currentHealth))</span>
+
+		<span class="hljs-comment">// This is the cures needed for the attack stage.</span>
+		<span class="hljs-comment">// Cures needed in the debuff stage are added directly onto currentT.</span>
+		curesNeeded := <span class="hljs-number">0</span>
+		impossible := <span class="hljs-literal">false</span>
+		lastActionIsCure = <span class="hljs-literal">false</span>
+		<span class="hljs-comment">// Once we finish simulating this choice of debuff, we need to restore the health value.</span>
+		healthBeforeBA := currentHealth
+
+		curePeriod := <span class="hljs-number">-1</span> <span class="hljs-comment">// how many attacks bwtween cures (with initial full health)</span>
+		firstCureI := <span class="hljs-number">-1</span>
+
+		<span class="hljs-comment">// Simulate attacks (adding cures when necessary), except for the last attack, which don't need to be followed by a cure.</span>
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; tBA<span class="hljs-number">-1</span>; {
+			<span class="hljs-keyword">if</span> curePeriod != <span class="hljs-number">-1</span> {
+				<span class="hljs-comment">// We don't need to simulate anymore.</span>
+				assert(curePeriod &gt; <span class="hljs-number">0</span>)
+				assert(currentHealth == Hd-attack(Ak, currentDebuff, D))
+				attacksRemaining := tBA - <span class="hljs-number">1</span> - i - <span class="hljs-number">1</span> <span class="hljs-comment">// An additional -1 because this i has already been cured.</span>
+				<span class="hljs-comment">// I admit that this way of writing thing is not the best approach.</span>
+				curesNeeded += attacksRemaining / curePeriod <span class="hljs-comment">// Remember: not counting last attack, so cure needed even after attack no. tBA-1</span>
+				<span class="hljs-keyword">break</span>
+			}
+
+			<span class="hljs-comment">// If we attacked/buffed, than...</span>
+			healthAfterThis := currentHealth - attack(Ak, currentDebuff, D)
+			<span class="hljs-keyword">if</span> healthAfterThis &lt;= <span class="hljs-number">0</span> {
+				<span class="hljs-comment">// Maybe we shouldn't had attacked/buffed, but cured instead.</span>
+				<span class="hljs-keyword">if</span> lastActionIsCure {
+					impossible = <span class="hljs-literal">true</span>
+					<span class="hljs-keyword">break</span>
+				} <span class="hljs-keyword">else</span> {
+					lastActionIsCure = <span class="hljs-literal">true</span>
+					<span class="hljs-keyword">if</span> firstCureI == <span class="hljs-number">-1</span> {
+						firstCureI = i
+					} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> curePeriod == <span class="hljs-number">-1</span> {
+						curePeriod = i - firstCureI
+					}
+					curesNeeded++
+					currentHealth = Hd - attack(Ak, currentDebuff, D) <span class="hljs-comment">// Knight will attack us after we cured.</span>
+					<span class="hljs-keyword">if</span> currentHealth &lt; <span class="hljs-number">0</span> {
+						impossible = <span class="hljs-literal">true</span>
+						<span class="hljs-keyword">break</span> <span class="hljs-comment">// This debuff amount isn't going to work.</span>
+					}
+				}
+			} <span class="hljs-keyword">else</span> {
+				lastActionIsCure = <span class="hljs-literal">false</span>
+				currentHealth = healthAfterThis
+				i++
+			}
+		}
+
+		<span class="hljs-comment">// One last attack here kills the knight, which is counted in tBA</span>
+
+		<span class="hljs-keyword">if</span> impossible {
+			currentHealth = healthBeforeBA
+			<span class="hljs-keyword">if</span> currentHealth-attack(Ak, currentDebuff+<span class="hljs-number">1</span>, D) &gt;= <span class="hljs-number">0</span> {
+				<span class="hljs-comment">// We can add one more debuff and survive.</span>
+				<span class="hljs-comment">// Not curing here would be safe, since we can cure later if needed</span>
+				currentT++
+				currentDebuff++
+				currentHealth = currentHealth - attack(Ak, currentDebuff, D)
+				<span class="hljs-keyword">continue</span>
+			} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> Hd-attack(Ak, currentDebuff, D)-attack(Ak, currentDebuff+<span class="hljs-number">1</span>, D) &lt;= <span class="hljs-number">0</span> { <span class="hljs-comment">// if cure (and be attacked) and debuff (and be attacked) still result in death, than all further debuff trials will result in IMPOSSIBLE result.</span>
+				<span class="hljs-keyword">break</span>
+			} <span class="hljs-keyword">else</span> {
+				<span class="hljs-comment">// cure</span>
+				currentT++
+				currentHealth = Hd - attack(Ak, currentDebuff, D)
+				currentDebuff++
+				currentT++
+				currentHealth -= attack(Ak, currentDebuff, D)
+				<span class="hljs-keyword">continue</span>
+			}
+		}
+		thisTurnNumber := currentT + tBA + curesNeeded
+		<span class="hljs-comment">// debug(fmt.Sprintf("thisTurnNumber = %d", thisTurnNumber))</span>
+		<span class="hljs-keyword">if</span> best &gt; thisTurnNumber || best == <span class="hljs-number">-1</span> {
+			best = thisTurnNumber
+		}
+
+		<span class="hljs-comment">// Try adding more debuff</span>
+		currentHealth = healthBeforeBA
+		currentDebuff++
+		currentT++
+		<span class="hljs-keyword">if</span> currentHealth-attack(Ak, currentDebuff, D) &lt;= <span class="hljs-number">0</span> {
+			currentT--
+			currentDebuff--
+			<span class="hljs-keyword">if</span> Hd-attack(Ak, currentDebuff, D) &lt;= <span class="hljs-number">0</span> {
+				<span class="hljs-keyword">break</span> <span class="hljs-comment">// impossible from now on</span>
+			} <span class="hljs-keyword">else</span> {
+				<span class="hljs-comment">// Cure</span>
+				currentT++
+				currentHealth = Hd - attack(Ak, currentDebuff, D)
+				<span class="hljs-comment">// Debuff</span>
+				currentT++
+				currentDebuff++
+				currentHealth -= attack(Ak, currentDebuff, D)
+				<span class="hljs-keyword">if</span> currentHealth &lt;= <span class="hljs-number">0</span> {
+					<span class="hljs-keyword">break</span>
+				}
+			}
+		} <span class="hljs-keyword">else</span> {
+			currentHealth -= attack(Ak, currentDebuff, D)
+			<span class="hljs-comment">// I initially forgot to write this else branch, which caused a lot of hard-to-debug incorrect answers and much frustration.</span>
+		}
+	}
+	<span class="hljs-keyword">return</span> best
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">attack</span><span class="hljs-params">(Ak, currentDebuff, D <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">if</span> currentDebuff*D &gt;= Ak {
+		<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> Ak - currentDebuff*D
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">optimizeBA</span><span class="hljs-params">(Hk, Ad, B <span class="hljs-keyword">int</span>)</span> <span class="hljs-params">(tBA, buff <span class="hljs-keyword">int</span>)</span></span> {
+	<span class="hljs-keyword">if</span> B == <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-keyword">int</span>(math.Ceil(<span class="hljs-keyword">float64</span>(Hk) / <span class="hljs-keyword">float64</span>(Ad))), <span class="hljs-number">0</span>
+	}
+	b := sort.Search(Hk/B+<span class="hljs-number">1</span>, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(b <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+		thisB := b + <span class="hljs-keyword">int</span>(math.Ceil(<span class="hljs-keyword">float64</span>(Hk)/<span class="hljs-keyword">float64</span>(Ad+B*b)))
+		nextB := b + <span class="hljs-number">1</span> + <span class="hljs-keyword">int</span>(math.Ceil(<span class="hljs-keyword">float64</span>(Hk)/<span class="hljs-keyword">float64</span>(Ad+B*(b+<span class="hljs-number">1</span>))))
+		<span class="hljs-keyword">return</span> nextB &gt;= thisB
+	})
+	<span class="hljs-comment">// debug(fmt.Sprintf("b = %d", b))</span>
+	<span class="hljs-keyword">return</span> b + <span class="hljs-keyword">int</span>(math.Ceil(<span class="hljs-keyword">float64</span>(Hk)/<span class="hljs-keyword">float64</span>(Ad+B*b))), b
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1A/3/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">4
+11 5 16 5 0 0
+3 1 3 2 2 0
+3 1 3 2 1 0
+2 1 5 1 1 1
+</code></pre><h2>Other files</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/problem.in" target="_blank">problem.in</a>:</div><a class="download" href="files/problem.in" title="Download original" download="problem.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1A/3/problem.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">2
+65 7 19 41 1 27
+36 41 85 76 28 49
+</code></pre><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/problem.out" target="_blank">problem.out</a>:</div><a class="download" href="files/problem.out" title="Download original" download="problem.out">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1A/3/problem.out" target="_blank">open on GitHub</a></div><pre><code class="hljs">Case #1: 4
+Case #2: 5
+</code></pre><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sketch.in" target="_blank">sketch.in</a>:</div><a class="download" href="files/sketch.in" title="Download original" download="sketch.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1A/3/sketch.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">1
+3 1 3 1 1 1
+</code></pre></body></html>

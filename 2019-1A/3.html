@@ -1,0 +1,177 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2019-1A Problem C - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2019-1A Problem C</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1A/3/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-keyword">type</span> SuffixTree <span class="hljs-keyword">struct</span> {
+	strsEndsIn []<span class="hljs-keyword">int</span>
+	subTree    <span class="hljs-keyword">map</span>[<span class="hljs-keyword">byte</span>]*SuffixTree
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">newSuffixTree</span><span class="hljs-params">()</span> *<span class="hljs-title">SuffixTree</span></span> {
+	<span class="hljs-keyword">return</span> &amp;SuffixTree{strsEndsIn: <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">0</span>), subTree: <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-keyword">byte</span>]*SuffixTree)}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(t *SuffixTree)</span> <span class="hljs-title">addInTree</span><span class="hljs-params">(suffix <span class="hljs-keyword">string</span>, stridx <span class="hljs-keyword">int</span>)</span></span> {
+	leaf := t
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(suffix); i++ {
+		char := suffix[i]
+		<span class="hljs-keyword">if</span> _, ok := leaf.subTree[char]; !ok {
+			leaf.subTree[char] = newSuffixTree()
+		}
+		leaf = leaf.subTree[char]
+	}
+	leaf.strsEndsIn = <span class="hljs-built_in">append</span>(leaf.strsEndsIn, stridx)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(t *SuffixTree)</span> <span class="hljs-title">find</span><span class="hljs-params">(suffix <span class="hljs-keyword">string</span>)</span> []<span class="hljs-title">int</span></span> {
+	leaf := t
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(suffix); i++ {
+		char := suffix[i]
+		<span class="hljs-keyword">if</span> _, ok := leaf.subTree[char]; !ok {
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+		}
+		leaf = leaf.subTree[char]
+	}
+	<span class="hljs-keyword">return</span> leaf.strsEndsIn
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> N <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;N)
+	words := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">string</span>, <span class="hljs-number">0</span>, N)
+	<span class="hljs-comment">// t := newSuffixTree()</span>
+	maxLength := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i++ {
+		word := mustReadLine()
+		words = <span class="hljs-built_in">append</span>(words, word)
+		<span class="hljs-keyword">if</span> maxLength &lt; <span class="hljs-built_in">len</span>(word) {
+			maxLength = <span class="hljs-built_in">len</span>(word)
+		}
+		<span class="hljs-comment">// stridx := len(words)</span>
+		<span class="hljs-comment">// for i := 0; i &lt; len(word); i++ {</span>
+		<span class="hljs-comment">// 	t.addInTree(word[i:], stridx)</span>
+		<span class="hljs-comment">// }</span>
+	}
+	maxSuffixLength := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, N)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i++ {
+		maxSuffixLength[i] = <span class="hljs-built_in">len</span>(words[i])
+	}
+	pairedWordsCount := <span class="hljs-number">0</span>
+	<span class="hljs-comment">// for thisWord := 0; thisWord &lt; N; thisWord++ {</span>
+	<span class="hljs-comment">// 	if !wordsRemaining[thisWord] {</span>
+	<span class="hljs-comment">// 		continue</span>
+	<span class="hljs-comment">// 	}</span>
+	<span class="hljs-comment">// 	word := words[thisWord]</span>
+	<span class="hljs-comment">// 	for suf := 0; suf &lt; len(word); suf++ {</span>
+	<span class="hljs-comment">// 		_strs := t.find(word[suf:])</span>
+	<span class="hljs-comment">// 		strsWithThisSuf := make([]int, 0, len(_strs))</span>
+	<span class="hljs-comment">// 		for _, stridx := range _strs {</span>
+	<span class="hljs-comment">// 			if wordsRemaining[stridx] {</span>
+	<span class="hljs-comment">// 				strsWithThisSuf = append(strsWithThisSuf, stridx)</span>
+	<span class="hljs-comment">// 				if len(strsWithThisSuf) &gt; 2 {</span>
+	<span class="hljs-comment">// 					break</span>
+	<span class="hljs-comment">// 				}</span>
+	<span class="hljs-comment">// 			}</span>
+	<span class="hljs-comment">// 		}</span>
+	<span class="hljs-comment">// 		if len(strsWithThisSuf) &gt; 2 {</span>
+	<span class="hljs-comment">// 			wordsRemaining[thisWord] = false</span>
+	<span class="hljs-comment">// 			break</span>
+	<span class="hljs-comment">// 		}</span>
+	<span class="hljs-comment">// 		if len(strsWithThisSuf) == 2 {</span>
+	<span class="hljs-comment">// 			otherWord := strsWithThisSuf[0]</span>
+	<span class="hljs-comment">// 			if otherWord == thisWord {</span>
+	<span class="hljs-comment">// 				otherWord = strsWithThisSuf[1]</span>
+	<span class="hljs-comment">// 			}</span>
+	<span class="hljs-comment">// 			pairedWordsCount += 2</span>
+	<span class="hljs-comment">// 			wordsRemaining[otherWord] = false</span>
+	<span class="hljs-comment">// 			wordsRemaining[thisWord] = false</span>
+	<span class="hljs-comment">// 			break</span>
+	<span class="hljs-comment">// 		}</span>
+	<span class="hljs-comment">// 		assert(len(strsWithThisSuf) == 1)</span>
+	<span class="hljs-comment">// 	}</span>
+	<span class="hljs-comment">// }</span>
+
+	<span class="hljs-keyword">for</span> suffixLength := maxLength; suffixLength &gt;= <span class="hljs-number">1</span>; suffixLength-- {
+		<span class="hljs-comment">// debug(fmt.Sprintf("suffixLength = %v", suffixLength))</span>
+		t := newSuffixTree()
+		<span class="hljs-keyword">for</span> thisWord := <span class="hljs-number">0</span>; thisWord &lt; <span class="hljs-built_in">len</span>(words); thisWord++ {
+			<span class="hljs-keyword">if</span> maxSuffixLength[thisWord] &lt; suffixLength {
+				<span class="hljs-keyword">continue</span>
+			}
+			word := words[thisWord]
+			<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(word) &lt; suffixLength {
+				<span class="hljs-keyword">continue</span>
+			}
+			thisSuffix := word[<span class="hljs-built_in">len</span>(word)-suffixLength:]
+			<span class="hljs-comment">// debug(fmt.Sprintf("Adding %v", thisSuffix))</span>
+			t.addInTree(thisSuffix, thisWord)
+		}
+		<span class="hljs-keyword">for</span> thisWord := <span class="hljs-number">0</span>; thisWord &lt; <span class="hljs-built_in">len</span>(words); thisWord++ {
+			<span class="hljs-keyword">if</span> maxSuffixLength[thisWord] &lt; suffixLength {
+				<span class="hljs-keyword">continue</span>
+			}
+			word := words[thisWord]
+			<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(word) &lt; suffixLength {
+				<span class="hljs-keyword">continue</span>
+			}
+			thisSuffix := word[<span class="hljs-built_in">len</span>(word)-suffixLength:]
+			<span class="hljs-comment">// debug(thisSuffix)</span>
+			_foundWords := t.find(thisSuffix)
+			foundWords := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(_foundWords))
+			<span class="hljs-keyword">for</span> _, w := <span class="hljs-keyword">range</span> _foundWords {
+				<span class="hljs-keyword">if</span> maxSuffixLength[w] &gt;= suffixLength {
+					foundWords = <span class="hljs-built_in">append</span>(foundWords, w)
+				}
+			}
+			<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(foundWords) &gt;= <span class="hljs-number">2</span> {
+				otherWord := foundWords[<span class="hljs-number">0</span>]
+				<span class="hljs-keyword">if</span> otherWord == thisWord {
+					otherWord = foundWords[<span class="hljs-number">1</span>]
+				}
+				maxSuffixLength[thisWord] = <span class="hljs-number">0</span>
+				maxSuffixLength[otherWord] = <span class="hljs-number">0</span>
+				pairedWordsCount += <span class="hljs-number">2</span>
+				<span class="hljs-comment">// debug(fmt.Sprintf("Pair: %v and %v. Found %v other words", word, words[otherWord], len(foundWords)-1))</span>
+				<span class="hljs-keyword">for</span> i := <span class="hljs-number">2</span>; i &lt; <span class="hljs-built_in">len</span>(foundWords); i++ {
+					maxSuffixLength[foundWords[i]] = suffixLength - <span class="hljs-number">1</span>
+					<span class="hljs-comment">// debug(fmt.Sprintf("Decreasing suffixLength for %v to %v", words[foundWords[i]], maxSuffixLength[foundWords[i]]))</span>
+				}
+				<span class="hljs-keyword">continue</span>
+			}
+		}
+	}
+	fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, pairedWordsCount)
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1A/3/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">4
+2
+TARPOL
+PROL
+3
+TARPOR
+PROL
+TARPRO
+6
+CODEJAM
+JAM
+HAM
+NALAM
+HUM
+NOLOM
+4
+PI
+HI
+WI
+FI</code></pre><h2>Other files</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sketch.in" target="_blank">sketch.in</a>:</div><a class="download" href="files/sketch.in" title="Download original" download="sketch.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1A/3/sketch.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">1
+8
+BBEJAM
+CODEJAM
+AAEJAM
+BBBJAM
+EAJAM
+CCCJAM
+BEJAM
+DAJAM
+</code></pre></body></html>

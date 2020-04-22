@@ -1,0 +1,53 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2020-qual Problem A - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2020-qual Problem A</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/main.cc" target="_blank">main.cc</a>:</div><a class="download" href="files/main.cc" title="Download original" download="main.cc">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2020-qual/1/main.cc" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;vector&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iterator&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;unordered_set&gt;</span></span>
+
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> <span class="hljs-built_in">std</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span> <span class="hljs-keyword">const</span> *argv[])</span>
+</span>{
+	<span class="hljs-built_in">cin</span>.sync_with_stdio(<span class="hljs-literal">false</span>);
+	<span class="hljs-keyword">int</span> t;
+	<span class="hljs-built_in">cin</span> &gt;&gt; t;
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; t; i ++) {
+		<span class="hljs-keyword">int</span> n;
+		<span class="hljs-built_in">cin</span> &gt;&gt; n;
+		<span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; mat;
+		mat.reserve(n*n);
+		<span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; n*n; i ++) {
+			<span class="hljs-keyword">int</span> r;
+			<span class="hljs-built_in">cin</span> &gt;&gt; r;
+			mat.push_back(r);
+		}
+		<span class="hljs-keyword">int</span> trace = <span class="hljs-number">0</span>, nb_repeating_row = <span class="hljs-number">0</span>, nb_repeating_col = <span class="hljs-number">0</span>;
+		<span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; n; i ++) trace += mat.at(i*n+i);
+		<span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>; x &lt; n; x ++) {
+			<span class="hljs-built_in">unordered_set</span>&lt;<span class="hljs-keyword">int</span>&gt; s;
+			<span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> y = <span class="hljs-number">0</span>; y &lt; n; y ++) {
+				<span class="hljs-keyword">int</span> it = mat.at(y*n+x);
+				<span class="hljs-keyword">if</span> (it &gt;= <span class="hljs-number">1</span> &amp;&amp; it &lt;= n &amp;&amp; s.<span class="hljs-built_in">find</span>(it) == s.<span class="hljs-built_in">end</span>()) {
+					s.insert(it);
+				} <span class="hljs-keyword">else</span> {
+					nb_repeating_col += <span class="hljs-number">1</span>;
+					<span class="hljs-keyword">break</span>;
+				}
+			}
+		}
+		<span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> y = <span class="hljs-number">0</span>; y &lt; n; y ++) {
+			<span class="hljs-built_in">unordered_set</span>&lt;<span class="hljs-keyword">int</span>&gt; s;
+			<span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>; x &lt; n; x ++) {
+				<span class="hljs-keyword">int</span> it = mat.at(y*n+x);
+				<span class="hljs-keyword">if</span> (it &gt;= <span class="hljs-number">1</span> &amp;&amp; it &lt;= n &amp;&amp; s.<span class="hljs-built_in">find</span>(it) == s.<span class="hljs-built_in">end</span>()) {
+					s.insert(it);
+				} <span class="hljs-keyword">else</span> {
+					nb_repeating_row += <span class="hljs-number">1</span>;
+					<span class="hljs-keyword">break</span>;
+				}
+			}
+		}
+		<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Case #"</span> &lt;&lt; i + <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-string">": "</span> &lt;&lt; trace &lt;&lt; <span class="hljs-string">" "</span> &lt;&lt; nb_repeating_row &lt;&lt; <span class="hljs-string">" "</span> &lt;&lt; nb_repeating_col &lt;&lt; <span class="hljs-built_in">endl</span>;
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre></body></html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2017-1A Problem A - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2017-1A Problem A</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1A/1/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> t <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;t)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; t; i++ {
+		fmt.Fprintf(stdout, <span class="hljs-string">"Case #%d:\n"</span>, i+<span class="hljs-number">1</span>)
+		test()
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> R, C <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;R, &amp;C)
+	cake := <span class="hljs-built_in">make</span>([][]<span class="hljs-keyword">byte</span>, R)
+	<span class="hljs-keyword">for</span> r := <span class="hljs-number">0</span>; r &lt; R; r++ {
+		readIn := mustReadLine()
+		row := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, C)
+		<span class="hljs-keyword">for</span> c := <span class="hljs-number">0</span>; c &lt; C; c++ {
+			row[c] = readIn[c]
+		}
+		cake[r] = row
+	}
+	<span class="hljs-keyword">var</span> firstNonEmptyRow []<span class="hljs-keyword">byte</span> = <span class="hljs-literal">nil</span>
+	rowIsEmpty := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">bool</span>, R)
+	<span class="hljs-keyword">for</span> r := <span class="hljs-number">0</span>; r &lt; R; r++ {
+		rowIsAllEmpty := <span class="hljs-literal">true</span>
+		row := cake[r]
+		<span class="hljs-keyword">var</span> lastChar <span class="hljs-keyword">byte</span> = <span class="hljs-string">'?'</span>
+		<span class="hljs-keyword">var</span> firstChar <span class="hljs-keyword">byte</span> = <span class="hljs-string">'?'</span>
+		<span class="hljs-keyword">for</span> c := <span class="hljs-number">0</span>; c &lt; C; c++ {
+			<span class="hljs-keyword">if</span> row[c] == <span class="hljs-string">'?'</span> {
+				row[c] = lastChar
+				<span class="hljs-keyword">continue</span>
+			}
+			rowIsAllEmpty = <span class="hljs-literal">false</span>
+			<span class="hljs-keyword">if</span> firstChar == <span class="hljs-string">'?'</span> {
+				firstChar = row[c]
+			}
+			lastChar = row[c]
+		}
+		rowIsEmpty[r] = rowIsAllEmpty
+		<span class="hljs-keyword">if</span> rowIsAllEmpty {
+			<span class="hljs-keyword">continue</span>
+		}
+		<span class="hljs-keyword">for</span> c := <span class="hljs-number">0</span>; c &lt; C &amp;&amp; row[c] == <span class="hljs-string">'?'</span>; c++ {
+			row[c] = firstChar
+		}
+		<span class="hljs-keyword">if</span> firstNonEmptyRow == <span class="hljs-literal">nil</span> {
+			firstNonEmptyRow = row
+		}
+	}
+	<span class="hljs-keyword">if</span> firstNonEmptyRow == <span class="hljs-literal">nil</span> {
+		<span class="hljs-built_in">panic</span>(<span class="hljs-string">"All empty."</span>)
+	}
+	lastNonEmptyRow := firstNonEmptyRow
+	<span class="hljs-keyword">for</span> r := <span class="hljs-number">0</span>; r &lt; R; r++ {
+		<span class="hljs-keyword">if</span> rowIsEmpty[r] {
+			cake[r] = lastNonEmptyRow
+		} <span class="hljs-keyword">else</span> {
+			lastNonEmptyRow = cake[r]
+		}
+		stdout.WriteString(<span class="hljs-keyword">string</span>(cake[r]))
+		stdout.WriteByte(<span class="hljs-string">'\n'</span>)
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1A/1/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">3
+3 3
+G??
+?C?
+??J
+3 4
+CODE
+????
+?JAM
+2 2
+CA
+KE
+</code></pre></body></html>

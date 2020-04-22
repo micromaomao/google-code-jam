@@ -1,0 +1,225 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2018-1B Problem A - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2018-1B Problem A</h1><h2>Wrong solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/wrong/cmd.go" target="_blank">wrong/cmd.go</a>:</div><a class="download" href="files/wrong/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/1/wrong/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">Round</span><span class="hljs-params">(f <span class="hljs-keyword">float64</span>)</span> <span class="hljs-title">float64</span></span> {
+	intPart := <span class="hljs-keyword">int64</span>(f)
+	f -= <span class="hljs-keyword">float64</span>(intPart)
+	<span class="hljs-keyword">if</span> f &gt;= <span class="hljs-number">0.5</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-keyword">float64</span>(intPart + <span class="hljs-number">1</span>)
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-keyword">float64</span>(intPart)
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">Abs</span><span class="hljs-params">(f <span class="hljs-keyword">float64</span>)</span> <span class="hljs-title">float64</span></span> {
+	<span class="hljs-keyword">if</span> f &lt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> -f
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> f
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-keyword">type</span> L <span class="hljs-keyword">struct</span> {
+	numVotes               <span class="hljs-keyword">int</span>
+	votesRequiredToRoundUp <span class="hljs-keyword">int</span>
+}
+
+<span class="hljs-keyword">type</span> Larr []L
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(l Larr)</span> <span class="hljs-title">Len</span><span class="hljs-params">()</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">return</span> <span class="hljs-built_in">len</span>(l)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(l Larr)</span> <span class="hljs-title">Less</span><span class="hljs-params">(i <span class="hljs-keyword">int</span>, j <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+	<span class="hljs-keyword">return</span> l[i].votesRequiredToRoundUp &lt; l[j].votesRequiredToRoundUp
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(l Larr)</span> <span class="hljs-title">Swap</span><span class="hljs-params">(i <span class="hljs-keyword">int</span>, j <span class="hljs-keyword">int</span>)</span></span> {
+	l[i], l[j] = l[j], l[i]
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> N, l <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;N, &amp;l)
+	Cis := mustReadLineOfIntsIntoArray()
+	assert(<span class="hljs-built_in">len</span>(Cis) == l)
+	larr := <span class="hljs-built_in">make</span>(Larr, l)
+	votesLeft := N
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; l; i++ {
+		larr[i].numVotes = Cis[i]
+		votesLeft -= larr[i].numVotes
+	}
+	assert(votesLeft &gt; <span class="hljs-number">0</span>)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; l; i++ {
+		<span class="hljs-keyword">var</span> nvAdd = sort.Search(votesLeft+<span class="hljs-number">2</span>, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(nvAdd <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+			f := <span class="hljs-keyword">float64</span>(larr[i].numVotes+nvAdd) / <span class="hljs-keyword">float64</span>(N)
+			<span class="hljs-keyword">return</span> Round(f*<span class="hljs-number">100</span>) &gt; (f * <span class="hljs-number">100</span>)
+		})
+		larr[i].votesRequiredToRoundUp = nvAdd
+	}
+	sort.Sort(larr)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; l; i++ {
+		<span class="hljs-keyword">if</span> larr[i].votesRequiredToRoundUp &lt;= votesLeft {
+			larr[i].numVotes += larr[i].votesRequiredToRoundUp
+			votesLeft -= larr[i].votesRequiredToRoundUp
+			larr[i].votesRequiredToRoundUp = <span class="hljs-number">0</span>
+		} <span class="hljs-keyword">else</span> {
+			<span class="hljs-keyword">break</span>
+		}
+	}
+	<span class="hljs-keyword">for</span> votesLeft &gt; <span class="hljs-number">0</span> {
+		useVotes := sort.Search(votesLeft+<span class="hljs-number">2</span>, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(vUse <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+			f := <span class="hljs-keyword">float64</span>(vUse) / <span class="hljs-keyword">float64</span>(N)
+			<span class="hljs-keyword">return</span> Round(f*<span class="hljs-number">100</span>) &gt; f*<span class="hljs-number">100</span>
+		})
+		<span class="hljs-keyword">if</span> useVotes &gt; votesLeft {
+			<span class="hljs-keyword">break</span>
+		}
+		larr = <span class="hljs-built_in">append</span>(larr, L{numVotes: useVotes})
+		votesLeft -= useVotes
+	}
+	<span class="hljs-keyword">if</span> votesLeft &gt; <span class="hljs-number">0</span> {
+		larr = <span class="hljs-built_in">append</span>(larr, L{numVotes: votesLeft})
+	}
+	sum := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">var</span> realSum <span class="hljs-keyword">float64</span> = <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(larr); i++ {
+		f := <span class="hljs-keyword">float64</span>(larr[i].numVotes) / <span class="hljs-keyword">float64</span>(N)
+		precentage := <span class="hljs-keyword">int</span>(Round(f * <span class="hljs-number">100</span>))
+		sum += precentage
+		realSum += f
+	}
+	assert(Abs(realSum<span class="hljs-number">-1</span>) &lt; <span class="hljs-number">1e-7</span>)
+	fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, sum)
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Solution that only works for the small input</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/small/cmd.go" target="_blank">small/cmd.go</a>:</div><a class="download" href="files/small/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/1/small/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">/*
+
+	DOES ANYONE HAVE A PROOF OF THIS APPROACH??? (i.e. maximizing number of languages that rounds up)
+
+*/</span>
+
+<span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">Round</span><span class="hljs-params">(f <span class="hljs-keyword">float64</span>)</span> <span class="hljs-title">float64</span></span> {
+	intPart := <span class="hljs-keyword">int64</span>(f)
+	f -= <span class="hljs-keyword">float64</span>(intPart)
+	<span class="hljs-keyword">if</span> f &gt;= <span class="hljs-number">0.5</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-keyword">float64</span>(intPart + <span class="hljs-number">1</span>)
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-keyword">float64</span>(intPart)
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">Abs</span><span class="hljs-params">(f <span class="hljs-keyword">float64</span>)</span> <span class="hljs-title">float64</span></span> {
+	<span class="hljs-keyword">if</span> f &lt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> -f
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> f
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-keyword">type</span> L <span class="hljs-keyword">struct</span> {
+	numVotes               <span class="hljs-keyword">int</span>
+	votesRequiredToRoundUp <span class="hljs-keyword">int</span>
+}
+
+<span class="hljs-keyword">type</span> Larr []L
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(l Larr)</span> <span class="hljs-title">Len</span><span class="hljs-params">()</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">return</span> <span class="hljs-built_in">len</span>(l)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(l Larr)</span> <span class="hljs-title">Less</span><span class="hljs-params">(i <span class="hljs-keyword">int</span>, j <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+	<span class="hljs-keyword">return</span> l[i].votesRequiredToRoundUp &lt; l[j].votesRequiredToRoundUp
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(l Larr)</span> <span class="hljs-title">Swap</span><span class="hljs-params">(i <span class="hljs-keyword">int</span>, j <span class="hljs-keyword">int</span>)</span></span> {
+	l[i], l[j] = l[j], l[i]
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> N, l <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;N, &amp;l)
+	Cis := mustReadLineOfIntsIntoArray()
+	assert(<span class="hljs-built_in">len</span>(Cis) == l)
+	larr := <span class="hljs-built_in">make</span>(Larr, l)
+	votesLeft := N
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; l; i++ {
+		larr[i].numVotes = Cis[i]
+		votesLeft -= larr[i].numVotes
+		<span class="hljs-keyword">var</span> nvAdd <span class="hljs-keyword">int</span>
+		<span class="hljs-keyword">for</span> nvAdd = <span class="hljs-number">0</span>; nvAdd &lt;= N; nvAdd++ {
+			f := <span class="hljs-keyword">float64</span>(larr[i].numVotes+nvAdd) / <span class="hljs-keyword">float64</span>(N)
+			<span class="hljs-keyword">if</span> f &gt; <span class="hljs-number">1</span> {
+				<span class="hljs-keyword">break</span>
+			}
+			isRoundUp := Round(f*<span class="hljs-number">100</span>) &gt; (f * <span class="hljs-number">100</span>)
+			<span class="hljs-keyword">if</span> isRoundUp {
+				<span class="hljs-keyword">break</span>
+			}
+		}
+		larr[i].votesRequiredToRoundUp = nvAdd
+	}
+	debug(fmt.Sprintf(<span class="hljs-string">"%v"</span>, larr))
+	assert(votesLeft &gt; <span class="hljs-number">0</span>)
+	sort.Sort(larr)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; l; i++ {
+		<span class="hljs-keyword">if</span> larr[i].votesRequiredToRoundUp &lt;= votesLeft {
+			larr[i].numVotes += larr[i].votesRequiredToRoundUp
+			votesLeft -= larr[i].votesRequiredToRoundUp
+			larr[i].votesRequiredToRoundUp = <span class="hljs-number">0</span>
+		} <span class="hljs-keyword">else</span> {
+			<span class="hljs-keyword">break</span>
+		}
+	}
+a:
+	<span class="hljs-keyword">for</span> votesLeft &gt; <span class="hljs-number">0</span> {
+		useVotes := <span class="hljs-number">0</span>
+		<span class="hljs-keyword">for</span> {
+			f := <span class="hljs-keyword">float64</span>(useVotes) / <span class="hljs-keyword">float64</span>(N)
+			isRoundUp := Round(f*<span class="hljs-number">100</span>) &gt; f*<span class="hljs-number">100</span>
+			<span class="hljs-keyword">if</span> isRoundUp {
+				<span class="hljs-keyword">break</span>
+			} <span class="hljs-keyword">else</span> {
+				useVotes++
+				<span class="hljs-keyword">if</span> useVotes &gt; votesLeft {
+					<span class="hljs-keyword">break</span> a
+				}
+			}
+		}
+		larr = <span class="hljs-built_in">append</span>(larr, L{numVotes: useVotes})
+		votesLeft -= useVotes
+	}
+	<span class="hljs-keyword">if</span> votesLeft &gt; <span class="hljs-number">0</span> {
+		larr = <span class="hljs-built_in">append</span>(larr, L{numVotes: votesLeft})
+	}
+	sum := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">var</span> realSum <span class="hljs-keyword">float64</span> = <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(larr); i++ {
+		f := <span class="hljs-keyword">float64</span>(larr[i].numVotes) / <span class="hljs-keyword">float64</span>(N)
+		percentage := <span class="hljs-keyword">int</span>(Round(f * <span class="hljs-number">100</span>))
+		sum += percentage
+		realSum += f
+	}
+	assert(Abs(realSum<span class="hljs-number">-1</span>) &lt; <span class="hljs-number">1e-7</span>)
+	fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, sum)
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/1/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">4
+3 2
+1 1
+10 3
+1 3 2
+6 2
+3 1
+9 8
+1 1 1 1 1 1 1 1
+</code></pre></body></html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2019-1B Problem C - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2019-1B Problem C</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1B/3/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">min</span><span class="hljs-params">(a, b <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">if</span> a &lt; b {
+		<span class="hljs-keyword">return</span> a
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> b
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">max</span><span class="hljs-params">(a, b <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">if</span> a &gt; b {
+		<span class="hljs-keyword">return</span> a
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> b
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">ConstructMaxTable</span><span class="hljs-params">(arr []<span class="hljs-keyword">int</span>)</span> [][]<span class="hljs-title">int</span></span> {
+	logArrLen := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> arrLen := <span class="hljs-built_in">len</span>(arr); arrLen &gt; <span class="hljs-number">0</span>; arrLen &gt;&gt;= <span class="hljs-number">1</span> {
+		logArrLen++
+	}
+	maxTable := <span class="hljs-built_in">make</span>([][]<span class="hljs-keyword">int</span>, <span class="hljs-number">0</span>, logArrLen+<span class="hljs-number">1</span>) <span class="hljs-comment">// store indices, not values</span>
+	<span class="hljs-keyword">for</span> currentSegLen := <span class="hljs-number">1</span>; currentSegLen &lt;= <span class="hljs-built_in">len</span>(arr); currentSegLen *= <span class="hljs-number">2</span> {
+		thisMaxRow := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-built_in">len</span>(arr)-currentSegLen+<span class="hljs-number">1</span>)
+		<span class="hljs-keyword">if</span> currentSegLen == <span class="hljs-number">1</span> {
+			<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(arr); i++ {
+				thisMaxRow[i] = i
+			}
+		} <span class="hljs-keyword">else</span> {
+			lastMaxRow := maxTable[<span class="hljs-built_in">len</span>(maxTable)<span class="hljs-number">-1</span>]
+			<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(arr)-currentSegLen+<span class="hljs-number">1</span>; i++ {
+				indexA := lastMaxRow[i]
+				indexB := lastMaxRow[i+currentSegLen/<span class="hljs-number">2</span>]
+				<span class="hljs-keyword">if</span> arr[indexA] &gt;= arr[indexB] { <span class="hljs-comment">// perfer low index</span>
+					thisMaxRow[i] = indexA
+				} <span class="hljs-keyword">else</span> {
+					thisMaxRow[i] = indexB
+				}
+			}
+		}
+		maxTable = <span class="hljs-built_in">append</span>(maxTable, thisMaxRow)
+	}
+	<span class="hljs-keyword">return</span> maxTable
+}
+
+<span class="hljs-comment">// find the maximum element in range [start, end) and return its index, perfering lower index when equal.</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">RangeMax</span><span class="hljs-params">(arr []<span class="hljs-keyword">int</span>, maxTable [][]<span class="hljs-keyword">int</span>, start, end <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">int</span></span> {
+	rangeLen := <span class="hljs-keyword">uint</span>(end - start)
+	<span class="hljs-keyword">if</span> rangeLen == <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> start
+	}
+	<span class="hljs-keyword">var</span> rangeLevel <span class="hljs-keyword">uint</span> = <span class="hljs-number">0</span>
+	<span class="hljs-keyword">var</span> rpower <span class="hljs-keyword">uint</span>
+	<span class="hljs-keyword">for</span> rpower = <span class="hljs-number">1</span>; rpower &lt; rangeLen; rpower &lt;&lt;= <span class="hljs-number">1</span> {
+		rangeLevel++
+	}
+	<span class="hljs-keyword">if</span> (<span class="hljs-number">1</span> &lt;&lt; rangeLevel) == rangeLen {
+		<span class="hljs-keyword">return</span> maxTable[rangeLevel][start]
+	} <span class="hljs-keyword">else</span> {
+		rangeLevel--
+		indexA := maxTable[rangeLevel][start]
+		indexB := maxTable[rangeLevel][end-(<span class="hljs-number">1</span>&lt;&lt;rangeLevel)]
+		<span class="hljs-keyword">if</span> arr[indexA] &gt;= arr[indexB] {
+			<span class="hljs-keyword">return</span> indexA
+		} <span class="hljs-keyword">else</span> {
+			<span class="hljs-keyword">return</span> indexB
+		}
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-keyword">var</span> nTypes, K <span class="hljs-keyword">int</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	mustReadLineOfInts(&amp;nTypes, &amp;K)
+	cSkills := mustReadLineOfIntsIntoArray()
+	assert(<span class="hljs-built_in">len</span>(cSkills) == nTypes)
+	dSkills := mustReadLineOfIntsIntoArray()
+	cMaxTable := ConstructMaxTable(cSkills)
+	dMaxTable := ConstructMaxTable(dSkills)
+	assert(<span class="hljs-built_in">len</span>(dSkills) == nTypes)
+	count := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; nTypes; i++ {
+		currentChosenSkill := cSkills[i]
+		<span class="hljs-comment">// ! ! ! . . . ...</span>
+		stillChooseILeft := <span class="hljs-number">0</span> <span class="hljs-comment">// least index that still result in choosing i</span>
+		<span class="hljs-keyword">if</span> i &gt; <span class="hljs-number">0</span> {
+			stillChooseILeft = sort.Search(i, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(left <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+				<span class="hljs-comment">// still choose i?</span>
+				newMaxI := RangeMax(cSkills, cMaxTable, left, i)
+				<span class="hljs-comment">// Problem here:</span>
+				<span class="hljs-comment">// return newMaxI &lt;= currentChosenSkill</span>
+				<span class="hljs-keyword">return</span> cSkills[newMaxI] &lt;= currentChosenSkill
+			})
+		}
+		goodEnoughLeft := sort.Search(i+<span class="hljs-number">1</span>, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(left <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+			dChoose := RangeMax(dSkills, dMaxTable, left, i+<span class="hljs-number">1</span>)
+			<span class="hljs-keyword">return</span> dSkills[dChoose]-currentChosenSkill &lt;= K
+		})
+		tooGoodLeft := sort.Search(i+<span class="hljs-number">1</span>, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(left <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+			dChoose := RangeMax(dSkills, dMaxTable, left, i+<span class="hljs-number">1</span>)
+			<span class="hljs-keyword">return</span> !(currentChosenSkill-dSkills[dChoose] &lt;= K)
+		})
+		<span class="hljs-keyword">if</span> goodEnoughLeft == i+<span class="hljs-number">1</span> {
+			<span class="hljs-keyword">continue</span>
+		}
+		assert(goodEnoughLeft &lt;= tooGoodLeft)
+		stillChooseIRight := nTypes <span class="hljs-comment">// first index that will result in not choosing i</span>
+		<span class="hljs-keyword">if</span> i &lt; nTypes<span class="hljs-number">-1</span> {
+			stillChooseIRight = sort.Search(nTypes, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(right <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+				<span class="hljs-keyword">if</span> right &lt;= i {
+					<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+				}
+				<span class="hljs-comment">// Problem here:</span>
+				<span class="hljs-comment">// newMaxI := RangeMax(cSkills, cMaxTable, i+1, right)</span>
+				newMaxI := RangeMax(cSkills, cMaxTable, i+<span class="hljs-number">1</span>, right+<span class="hljs-number">1</span>)
+				<span class="hljs-keyword">return</span> !(cSkills[newMaxI] &lt; currentChosenSkill)
+			})
+		}
+		firstNotGoodEnoughRight := sort.Search(nTypes, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(right <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+			<span class="hljs-keyword">if</span> right &lt; i {
+				<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+			}
+			dChoose := RangeMax(dSkills, dMaxTable, i, right+<span class="hljs-number">1</span>)
+			<span class="hljs-keyword">return</span> !(dSkills[dChoose]-currentChosenSkill &lt;= K)
+		})
+		<span class="hljs-keyword">if</span> firstNotGoodEnoughRight == i {
+			<span class="hljs-keyword">continue</span>
+		}
+		firstNotTooGoodRight := sort.Search(nTypes, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(right <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+			<span class="hljs-keyword">if</span> right &lt; i {
+				<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+			}
+			dChoose := RangeMax(dSkills, dMaxTable, i, right+<span class="hljs-number">1</span>)
+			<span class="hljs-keyword">return</span> currentChosenSkill-dSkills[dChoose] &lt;= K
+		})
+		assert(firstNotTooGoodRight &lt;= firstNotGoodEnoughRight)
+		ans := (i - max(stillChooseILeft, goodEnoughLeft) + <span class="hljs-number">1</span>) * (min(firstNotGoodEnoughRight, stillChooseIRight) - i)
+		<span class="hljs-keyword">if</span> tooGoodLeft &lt; firstNotTooGoodRight {
+			ans -= (i - max(stillChooseILeft, tooGoodLeft) + <span class="hljs-number">1</span>) * (min(firstNotTooGoodRight, stillChooseIRight) - i)
+		}
+		assert(ans &gt;= <span class="hljs-number">0</span>)
+		count += ans
+	}
+	fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, count)
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Solution that only works for the small input</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/small/cmd.go" target="_blank">small/cmd.go</a>:</div><a class="download" href="files/small/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1B/3/small/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">max</span><span class="hljs-params">(a, b <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">if</span> a &gt; b {
+		<span class="hljs-keyword">return</span> a
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> b
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">abs</span><span class="hljs-params">(x <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">if</span> x &lt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> -x
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> x
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> nTypes, K <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;nTypes, &amp;K)
+	cSkills := mustReadLineOfIntsIntoArray()
+	assert(<span class="hljs-built_in">len</span>(cSkills) == nTypes)
+	dSkills := mustReadLineOfIntsIntoArray()
+	assert(<span class="hljs-built_in">len</span>(dSkills) == nTypes)
+	count := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; nTypes; i++ {
+		currentCMax := cSkills[i]
+		currentDMax := dSkills[i]
+		<span class="hljs-keyword">for</span> j := i + <span class="hljs-number">1</span>; j &lt;= nTypes; j++ {
+			currentCMax = max(currentCMax, cSkills[j<span class="hljs-number">-1</span>])
+			currentDMax = max(currentDMax, dSkills[j<span class="hljs-number">-1</span>])
+			<span class="hljs-keyword">if</span> abs(currentCMax-currentDMax) &lt;= K {
+				count++
+			}
+		}
+	}
+	fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, count)
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1B/3/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">6
+4 0
+1 1 1 8
+8 8 8 8
+3 0
+0 1 1
+1 1 0
+1 0
+3
+3
+5 0
+0 8 0 8 0
+4 0 4 0 4
+3 0
+1 0 0
+0 1 2
+5 2
+1 2 3 4 5
+5 5 5 5 10
+</code></pre><h2>Other files</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/problem.in" target="_blank">problem.in</a>:</div><a class="download" href="files/problem.in" title="Download original" download="problem.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1B/3/problem.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">1
+6 1
+8 13 12 7 7 13
+0 0 1 3 2 11
+</code></pre><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/problem.out" target="_blank">problem.out</a>:</div><a class="download" href="files/problem.out" title="Download original" download="problem.out">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1B/3/problem.out" target="_blank">open on GitHub</a></div><pre><code class="hljs">Case #1: 0
+</code></pre><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/test-generator/cmd.go" target="_blank">test-generator/cmd.go</a>:</div><a class="download" href="files/test-generator/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1B/3/test-generator/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span> {
+	rawIn, err := os.OpenFile(<span class="hljs-string">"generated.in"</span>, os.O_CREATE|os.O_WRONLY, <span class="hljs-number">0666</span>)
+	<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+		<span class="hljs-built_in">panic</span>(err)
+	}
+	in := bufio.NewWriter(rawIn)
+	<span class="hljs-keyword">defer</span> rawIn.Close()
+	<span class="hljs-keyword">defer</span> in.Flush()
+	<span class="hljs-keyword">const</span> t <span class="hljs-keyword">int</span> = <span class="hljs-number">100</span>
+	fmt.Fprintf(in, <span class="hljs-string">"%d\n"</span>, t)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; t; i++ {
+		<span class="hljs-keyword">var</span> N, K <span class="hljs-keyword">int</span>
+		N = rand.Intn(<span class="hljs-number">10</span>) + <span class="hljs-number">1</span>
+		K = rand.Intn(<span class="hljs-number">5</span>)
+		fmt.Fprintf(in, <span class="hljs-string">"%d %d\n"</span>, N, K)
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">2</span>; i++ {
+			<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i++ {
+				<span class="hljs-keyword">if</span> i != <span class="hljs-number">0</span> {
+					in.WriteByte(<span class="hljs-string">' '</span>)
+				}
+				in.WriteString(strconv.Itoa(rand.Intn(<span class="hljs-number">15</span>)))
+			}
+			in.WriteByte(<span class="hljs-string">'\n'</span>)
+		}
+	}
+}
+</code></pre></body></html>

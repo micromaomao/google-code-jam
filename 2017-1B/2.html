@@ -1,0 +1,327 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2017-1B Problem B - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2017-1B Problem B</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1B/2/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> t <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;t)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; t; i++ {
+		fmt.Fprintf(stdout, <span class="hljs-string">"Case #%d: "</span>, i+<span class="hljs-number">1</span>)
+		ls := test()
+		<span class="hljs-keyword">if</span> ls == <span class="hljs-literal">nil</span> {
+			stdout.WriteString(<span class="hljs-string">"IMPOSSIBLE\n"</span>)
+		} <span class="hljs-keyword">else</span> {
+			stdout.Write(ls)
+			stdout.WriteByte(<span class="hljs-string">'\n'</span>)
+		}
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span> []<span class="hljs-title">byte</span></span> {
+	<span class="hljs-keyword">var</span> N, R, O, Y, G, B, V <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;N, &amp;R, &amp;O, &amp;Y, &amp;G, &amp;B, &amp;V)
+	preList := <span class="hljs-built_in">make</span>([][]<span class="hljs-keyword">byte</span>, <span class="hljs-number">0</span>, <span class="hljs-number">3</span>)
+	nR := R
+	nY := Y
+	nB := B
+	<span class="hljs-keyword">if</span> O &gt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">if</span> B == O &amp;&amp; N == O*<span class="hljs-number">2</span> {
+			rep := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, N)
+			<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i += <span class="hljs-number">2</span> {
+				rep[i] = <span class="hljs-string">'B'</span>
+				rep[i+<span class="hljs-number">1</span>] = <span class="hljs-string">'O'</span>
+			}
+			<span class="hljs-keyword">return</span> rep
+		}
+		<span class="hljs-keyword">if</span> B &lt; O+<span class="hljs-number">1</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+		}
+		B -= O + <span class="hljs-number">1</span>
+		ll := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, O*<span class="hljs-number">2</span>+<span class="hljs-number">1</span>)
+		ll[<span class="hljs-number">0</span>] = <span class="hljs-string">'B'</span>
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">1</span>; i &lt; <span class="hljs-built_in">len</span>(ll); i += <span class="hljs-number">2</span> {
+			ll[i] = <span class="hljs-string">'O'</span>
+		}
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">2</span>; i &lt; <span class="hljs-built_in">len</span>(ll); i += <span class="hljs-number">2</span> {
+			ll[i] = <span class="hljs-string">'B'</span>
+		}
+		O = <span class="hljs-number">0</span>
+		preList = <span class="hljs-built_in">append</span>(preList, ll)
+		nB = B + <span class="hljs-number">1</span>
+	}
+	<span class="hljs-keyword">if</span> G &gt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">if</span> R == G &amp;&amp; N == G*<span class="hljs-number">2</span> {
+			rep := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, N)
+			<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i += <span class="hljs-number">2</span> {
+				rep[i] = <span class="hljs-string">'R'</span>
+				rep[i+<span class="hljs-number">1</span>] = <span class="hljs-string">'G'</span>
+			}
+			<span class="hljs-keyword">return</span> rep
+		}
+		<span class="hljs-keyword">if</span> R &lt; G+<span class="hljs-number">1</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+		}
+		R -= G + <span class="hljs-number">1</span>
+		ll := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, G*<span class="hljs-number">2</span>+<span class="hljs-number">1</span>)
+		ll[<span class="hljs-number">0</span>] = <span class="hljs-string">'R'</span>
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">1</span>; i &lt; <span class="hljs-built_in">len</span>(ll); i += <span class="hljs-number">2</span> {
+			ll[i] = <span class="hljs-string">'G'</span>
+		}
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">2</span>; i &lt; <span class="hljs-built_in">len</span>(ll); i += <span class="hljs-number">2</span> {
+			ll[i] = <span class="hljs-string">'R'</span>
+		}
+		G = <span class="hljs-number">0</span>
+		preList = <span class="hljs-built_in">append</span>(preList, ll)
+		nR = R + <span class="hljs-number">1</span>
+	}
+	<span class="hljs-keyword">if</span> V &gt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">if</span> Y == V &amp;&amp; N == V*<span class="hljs-number">2</span> {
+			rep := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, N)
+			<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i += <span class="hljs-number">2</span> {
+				rep[i] = <span class="hljs-string">'Y'</span>
+				rep[i+<span class="hljs-number">1</span>] = <span class="hljs-string">'V'</span>
+			}
+			<span class="hljs-keyword">return</span> rep
+		}
+		<span class="hljs-keyword">if</span> Y &lt; V+<span class="hljs-number">1</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+		}
+		Y -= V + <span class="hljs-number">1</span>
+		ll := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, V*<span class="hljs-number">2</span>+<span class="hljs-number">1</span>)
+		ll[<span class="hljs-number">0</span>] = <span class="hljs-string">'Y'</span>
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">1</span>; i &lt; <span class="hljs-built_in">len</span>(ll); i += <span class="hljs-number">2</span> {
+			ll[i] = <span class="hljs-string">'V'</span>
+		}
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">2</span>; i &lt; <span class="hljs-built_in">len</span>(ll); i += <span class="hljs-number">2</span> {
+			ll[i] = <span class="hljs-string">'Y'</span>
+		}
+		V = <span class="hljs-number">0</span>
+		preList = <span class="hljs-built_in">append</span>(preList, ll)
+		nY = Y + <span class="hljs-number">1</span>
+	}
+	assert(<span class="hljs-built_in">len</span>(preList) &lt;= <span class="hljs-number">3</span>)
+	preListMap := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-keyword">byte</span>][]<span class="hljs-keyword">byte</span>)
+	<span class="hljs-keyword">for</span> _, ll := <span class="hljs-keyword">range</span> preList {
+		preListMap[ll[<span class="hljs-number">0</span>]] = ll
+	}
+	debug(fmt.Sprintf(<span class="hljs-string">"%v"</span>, preListMap))
+	baseList := sortOutSimpleCase(nR, nY, nB)
+	<span class="hljs-keyword">if</span> baseList == <span class="hljs-literal">nil</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+	} <span class="hljs-keyword">else</span> {
+		newList := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, <span class="hljs-number">0</span>, N)
+		<span class="hljs-keyword">for</span> _, baseLet := <span class="hljs-keyword">range</span> baseList {
+			<span class="hljs-keyword">if</span> pl, exist := preListMap[baseLet]; exist {
+				<span class="hljs-keyword">for</span> _, letter := <span class="hljs-keyword">range</span> pl {
+					newList = <span class="hljs-built_in">append</span>(newList, letter)
+				}
+				<span class="hljs-built_in">delete</span>(preListMap, baseLet)
+			} <span class="hljs-keyword">else</span> {
+				newList = <span class="hljs-built_in">append</span>(newList, baseLet)
+			}
+		}
+		<span class="hljs-keyword">return</span> newList
+	}
+}
+
+<span class="hljs-keyword">type</span> LetterAndNumber <span class="hljs-keyword">struct</span> {
+	letter <span class="hljs-keyword">byte</span>
+	number <span class="hljs-keyword">int</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">sortOutSimpleCase</span><span class="hljs-params">(R, Y, B <span class="hljs-keyword">int</span>)</span> []<span class="hljs-title">byte</span></span> {
+	colors := <span class="hljs-built_in">make</span>([]LetterAndNumber, <span class="hljs-number">3</span>)
+	colors[<span class="hljs-number">0</span>] = LetterAndNumber{<span class="hljs-string">'R'</span>, R}
+	colors[<span class="hljs-number">1</span>] = LetterAndNumber{<span class="hljs-string">'Y'</span>, Y}
+	colors[<span class="hljs-number">2</span>] = LetterAndNumber{<span class="hljs-string">'B'</span>, B}
+	sort.Slice(colors, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(i, j <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+		<span class="hljs-keyword">return</span> colors[i].number &gt; colors[j].number
+	})
+	dbgStr := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">string</span>, <span class="hljs-number">0</span>)
+	<span class="hljs-keyword">for</span> _, c := <span class="hljs-keyword">range</span> colors {
+		dbgStr = <span class="hljs-built_in">append</span>(dbgStr, fmt.Sprintf(<span class="hljs-string">"%v %v"</span>, <span class="hljs-keyword">string</span>(c.letter), c.number))
+	}
+	debug(strings.Join(dbgStr, <span class="hljs-string">", "</span>))
+	<span class="hljs-keyword">if</span> colors[<span class="hljs-number">0</span>].number == <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, <span class="hljs-number">0</span>)
+	}
+	<span class="hljs-keyword">if</span> colors[<span class="hljs-number">1</span>].number == <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+	}
+	list := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, R+Y+B)
+	<span class="hljs-keyword">for</span> a := <span class="hljs-number">0</span>; a &lt; <span class="hljs-built_in">len</span>(list); a++ {
+		list[a] = <span class="hljs-string">'_'</span>
+	}
+	<span class="hljs-keyword">var</span> i <span class="hljs-keyword">int</span>
+	<span class="hljs-keyword">for</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(list)<span class="hljs-number">-1</span>; i += <span class="hljs-number">2</span> {
+		list[i] = colors[<span class="hljs-number">0</span>].letter
+		colors[<span class="hljs-number">0</span>].number--
+		<span class="hljs-keyword">if</span> colors[<span class="hljs-number">0</span>].number == <span class="hljs-number">0</span> {
+			<span class="hljs-keyword">break</span>
+		}
+	}
+	<span class="hljs-keyword">if</span> colors[<span class="hljs-number">0</span>].number &gt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+	}
+	i += <span class="hljs-number">2</span>
+	<span class="hljs-keyword">if</span> i &gt;= <span class="hljs-built_in">len</span>(list) {
+		i = <span class="hljs-number">1</span>
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">for</span> ; i &lt; <span class="hljs-built_in">len</span>(list); i += <span class="hljs-number">2</span> {
+			<span class="hljs-keyword">if</span> colors[<span class="hljs-number">1</span>].number == <span class="hljs-number">0</span> {
+				<span class="hljs-built_in">panic</span>(<span class="hljs-string">"!"</span>)
+			}
+			list[i] = colors[<span class="hljs-number">1</span>].letter
+			colors[<span class="hljs-number">1</span>].number--
+		}
+	}
+	i = <span class="hljs-number">1</span>
+	<span class="hljs-keyword">for</span> ; i &lt; <span class="hljs-built_in">len</span>(list); i += <span class="hljs-number">2</span> {
+		<span class="hljs-keyword">if</span> colors[<span class="hljs-number">1</span>].number &gt; <span class="hljs-number">0</span> {
+			list[i] = colors[<span class="hljs-number">1</span>].letter
+			colors[<span class="hljs-number">1</span>].number--
+		} <span class="hljs-keyword">else</span> {
+			assert(colors[<span class="hljs-number">2</span>].number &gt; <span class="hljs-number">0</span>)
+			list[i] = colors[<span class="hljs-number">2</span>].letter
+			colors[<span class="hljs-number">2</span>].number--
+		}
+	}
+	<span class="hljs-keyword">for</span> _, l := <span class="hljs-keyword">range</span> list {
+		assert(l != <span class="hljs-string">'_'</span>)
+	}
+	<span class="hljs-keyword">return</span> list
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Wrong solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/wrong/cmd.go" target="_blank">wrong/cmd.go</a>:</div><a class="download" href="files/wrong/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1B/2/wrong/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// Fails with 4 2 0 2 0 0 0 -&gt; RYRY</span>
+<span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> N, R, O, Y, G, B, V <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;N, &amp;R, &amp;O, &amp;Y, &amp;G, &amp;B, &amp;V)
+	circle := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, <span class="hljs-number">0</span>, N)
+	debug(<span class="hljs-keyword">string</span>(circle))
+	flag := <span class="hljs-literal">false</span>
+	<span class="hljs-keyword">for</span> {
+		madeChanges := <span class="hljs-literal">false</span>
+		<span class="hljs-keyword">if</span> R &gt; <span class="hljs-number">0</span> {
+			<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(circle) == <span class="hljs-number">0</span> {
+				circle = <span class="hljs-built_in">append</span>(circle, <span class="hljs-string">'R'</span>)
+				R--
+				madeChanges = <span class="hljs-literal">true</span>
+			} <span class="hljs-keyword">else</span> {
+				<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(circle); i++ {
+					l := circle[i]
+					r := circle[(i+<span class="hljs-number">1</span>)%<span class="hljs-built_in">len</span>(circle)]
+					<span class="hljs-keyword">if</span> l != <span class="hljs-string">'R'</span> &amp;&amp; l != <span class="hljs-string">'O'</span> &amp;&amp; l != <span class="hljs-string">'V'</span> &amp;&amp; r != <span class="hljs-string">'R'</span> &amp;&amp; r != <span class="hljs-string">'O'</span> &amp;&amp; r != <span class="hljs-string">'V'</span> {
+						<span class="hljs-keyword">if</span> i == <span class="hljs-built_in">len</span>(circle)<span class="hljs-number">-1</span> {
+							circle = <span class="hljs-built_in">append</span>(circle, <span class="hljs-string">'R'</span>)
+						} <span class="hljs-keyword">else</span> {
+							circle = <span class="hljs-built_in">append</span>(circle, <span class="hljs-string">'_'</span>)
+							<span class="hljs-built_in">copy</span>(circle[i+<span class="hljs-number">2</span>:], circle[i+<span class="hljs-number">1</span>:<span class="hljs-built_in">len</span>(circle)<span class="hljs-number">-1</span>])
+							circle[i+<span class="hljs-number">1</span>] = <span class="hljs-string">'R'</span>
+						}
+						R--
+						madeChanges = <span class="hljs-literal">true</span>
+						<span class="hljs-keyword">break</span>
+					}
+				}
+			}
+		}
+		<span class="hljs-keyword">if</span> O &gt; <span class="hljs-number">0</span> {
+			<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(circle) == <span class="hljs-number">0</span> {
+				circle = <span class="hljs-built_in">append</span>(circle, <span class="hljs-string">'O'</span>)
+				O--
+				madeChanges = <span class="hljs-literal">true</span>
+			}
+		}
+		<span class="hljs-keyword">if</span> Y &gt; <span class="hljs-number">0</span> {
+			<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(circle) == <span class="hljs-number">0</span> {
+				circle = <span class="hljs-built_in">append</span>(circle, <span class="hljs-string">'Y'</span>)
+				Y--
+				madeChanges = <span class="hljs-literal">true</span>
+			} <span class="hljs-keyword">else</span> {
+				<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(circle); i++ {
+					l := circle[i]
+					r := circle[(i+<span class="hljs-number">1</span>)%<span class="hljs-built_in">len</span>(circle)]
+					<span class="hljs-keyword">if</span> l != <span class="hljs-string">'Y'</span> &amp;&amp; l != <span class="hljs-string">'O'</span> &amp;&amp; l != <span class="hljs-string">'G'</span> &amp;&amp; r != <span class="hljs-string">'Y'</span> &amp;&amp; r != <span class="hljs-string">'O'</span> &amp;&amp; r != <span class="hljs-string">'G'</span> {
+						<span class="hljs-keyword">if</span> i == <span class="hljs-built_in">len</span>(circle)<span class="hljs-number">-1</span> {
+							circle = <span class="hljs-built_in">append</span>(circle, <span class="hljs-string">'Y'</span>)
+						} <span class="hljs-keyword">else</span> {
+							circle = <span class="hljs-built_in">append</span>(circle, <span class="hljs-string">'_'</span>)
+							<span class="hljs-built_in">copy</span>(circle[i+<span class="hljs-number">2</span>:], circle[i+<span class="hljs-number">1</span>:<span class="hljs-built_in">len</span>(circle)<span class="hljs-number">-1</span>])
+							circle[i+<span class="hljs-number">1</span>] = <span class="hljs-string">'Y'</span>
+						}
+						Y--
+						madeChanges = <span class="hljs-literal">true</span>
+						<span class="hljs-keyword">break</span>
+					}
+				}
+			}
+		}
+		<span class="hljs-keyword">if</span> G &gt; <span class="hljs-number">0</span> {
+			<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(circle) == <span class="hljs-number">0</span> {
+				circle = <span class="hljs-built_in">append</span>(circle, <span class="hljs-string">'G'</span>)
+				G--
+				madeChanges = <span class="hljs-literal">true</span>
+			}
+		}
+		<span class="hljs-keyword">if</span> B &gt; <span class="hljs-number">0</span> {
+			<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(circle) == <span class="hljs-number">0</span> {
+				circle = <span class="hljs-built_in">append</span>(circle, <span class="hljs-string">'B'</span>)
+				B--
+				madeChanges = <span class="hljs-literal">true</span>
+			} <span class="hljs-keyword">else</span> {
+				<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(circle); i++ {
+					l := circle[i]
+					r := circle[(i+<span class="hljs-number">1</span>)%<span class="hljs-built_in">len</span>(circle)]
+					<span class="hljs-keyword">if</span> l != <span class="hljs-string">'B'</span> &amp;&amp; l != <span class="hljs-string">'G'</span> &amp;&amp; l != <span class="hljs-string">'V'</span> &amp;&amp; r != <span class="hljs-string">'B'</span> &amp;&amp; r != <span class="hljs-string">'G'</span> &amp;&amp; r != <span class="hljs-string">'V'</span> {
+						<span class="hljs-keyword">if</span> i == <span class="hljs-built_in">len</span>(circle)<span class="hljs-number">-1</span> {
+							circle = <span class="hljs-built_in">append</span>(circle, <span class="hljs-string">'B'</span>)
+						} <span class="hljs-keyword">else</span> {
+							circle = <span class="hljs-built_in">append</span>(circle, <span class="hljs-string">'_'</span>)
+							<span class="hljs-built_in">copy</span>(circle[i+<span class="hljs-number">2</span>:], circle[i+<span class="hljs-number">1</span>:<span class="hljs-built_in">len</span>(circle)<span class="hljs-number">-1</span>])
+							circle[i+<span class="hljs-number">1</span>] = <span class="hljs-string">'B'</span>
+						}
+						B--
+						madeChanges = <span class="hljs-literal">true</span>
+						<span class="hljs-keyword">break</span>
+					}
+				}
+			}
+		}
+		<span class="hljs-keyword">if</span> V &gt; <span class="hljs-number">0</span> {
+			<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(circle) == <span class="hljs-number">0</span> {
+				circle = <span class="hljs-built_in">append</span>(circle, <span class="hljs-string">'V'</span>)
+				V--
+				madeChanges = <span class="hljs-literal">true</span>
+			}
+		}
+		<span class="hljs-keyword">if</span> !madeChanges {
+			<span class="hljs-keyword">if</span> flag {
+				<span class="hljs-keyword">break</span>
+			} <span class="hljs-keyword">else</span> {
+				flag = <span class="hljs-literal">true</span>
+			}
+		} <span class="hljs-keyword">else</span> {
+			flag = <span class="hljs-literal">false</span>
+		}
+		debug(<span class="hljs-keyword">string</span>(circle))
+	}
+	<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(circle) == N {
+		stdout.WriteString(<span class="hljs-keyword">string</span>(circle))
+		stdout.WriteByte(<span class="hljs-string">'\n'</span>)
+	} <span class="hljs-keyword">else</span> {
+		stdout.WriteString(<span class="hljs-string">"IMPOSSIBLE\n"</span>)
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/problem.in" target="_blank">problem.in</a>:</div><a class="download" href="files/problem.in" title="Download original" download="problem.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1B/2/problem.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">1
+4 2 0 2 0 0 0
+</code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1B/2/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">4
+6 2 0 2 0 2 0
+3 1 0 2 0 0 0
+6 2 0 1 1 2 0
+4 0 0 2 0 0 2</code></pre><h2>Other files</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/problem.out" target="_blank">problem.out</a>:</div><a class="download" href="files/problem.out" title="Download original" download="problem.out">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1B/2/problem.out" target="_blank">open on GitHub</a></div><pre><code class="hljs">Case #1: RYRY
+</code></pre></body></html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2018-1A Problem A - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2018-1A Problem A</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1A/1/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> t <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;t)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; t; i++ {
+		stdout.WriteString(fmt.Sprintf(<span class="hljs-string">"Case #%d: "</span>, i+<span class="hljs-number">1</span>))
+		possible := test()
+		<span class="hljs-keyword">if</span> possible {
+			stdout.WriteString(<span class="hljs-string">"POSSIBLE\n"</span>)
+		} <span class="hljs-keyword">else</span> {
+			stdout.WriteString(<span class="hljs-string">"IMPOSSIBLE\n"</span>)
+		}
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span> <span class="hljs-title">bool</span></span> {
+	<span class="hljs-keyword">var</span> r, c, h, v <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;r, &amp;c, &amp;h, &amp;v)
+	grid := <span class="hljs-built_in">make</span>([][]<span class="hljs-keyword">bool</span>, r)
+	sumgrid := <span class="hljs-built_in">make</span>([][]<span class="hljs-keyword">int</span>, r)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; r; i++ {
+		grid[i] = <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">bool</span>, c)
+		sumgrid[i] = <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, c)
+	}
+	<span class="hljs-keyword">for</span> l := <span class="hljs-number">0</span>; l &lt; r; l++ {
+		line := mustReadLine()
+		<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(line) != c {
+			<span class="hljs-built_in">panic</span>(<span class="hljs-string">"Invalid input."</span>)
+		}
+		<span class="hljs-keyword">for</span> x := <span class="hljs-number">0</span>; x &lt; c; x++ {
+			grid[l][x] = (line[x] == <span class="hljs-string">'@'</span>)
+		}
+	}
+	<span class="hljs-comment">// first row sum</span>
+	<span class="hljs-keyword">if</span> grid[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>] {
+		sumgrid[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>] = <span class="hljs-number">1</span>
+	}
+	<span class="hljs-keyword">for</span> x := <span class="hljs-number">1</span>; x &lt; c; x++ {
+		sumgrid[<span class="hljs-number">0</span>][x] = sumgrid[<span class="hljs-number">0</span>][x<span class="hljs-number">-1</span>]
+		<span class="hljs-keyword">if</span> grid[<span class="hljs-number">0</span>][x] {
+			sumgrid[<span class="hljs-number">0</span>][x]++
+		}
+	}
+	<span class="hljs-keyword">for</span> y := <span class="hljs-number">1</span>; y &lt; r; y++ {
+		sumgrid[y][<span class="hljs-number">0</span>] = sumgrid[y<span class="hljs-number">-1</span>][<span class="hljs-number">0</span>]
+		<span class="hljs-keyword">if</span> grid[y][<span class="hljs-number">0</span>] {
+			sumgrid[y][<span class="hljs-number">0</span>]++
+		}
+	}
+	<span class="hljs-keyword">for</span> y := <span class="hljs-number">1</span>; y &lt; r; y++ {
+		<span class="hljs-keyword">for</span> x := <span class="hljs-number">1</span>; x &lt; c; x++ {
+			sumgrid[y][x] = sumgrid[y<span class="hljs-number">-1</span>][x] + sumgrid[y][x<span class="hljs-number">-1</span>] - sumgrid[y<span class="hljs-number">-1</span>][x<span class="hljs-number">-1</span>]
+			<span class="hljs-keyword">if</span> grid[y][x] {
+				sumgrid[y][x]++
+			}
+		}
+	}
+	<span class="hljs-keyword">if</span> sumgrid[r<span class="hljs-number">-1</span>][c<span class="hljs-number">-1</span>] == <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+	}
+	segV := sumgrid[r<span class="hljs-number">-1</span>][c<span class="hljs-number">-1</span>] / (v + <span class="hljs-number">1</span>)
+	segVRem := sumgrid[r<span class="hljs-number">-1</span>][c<span class="hljs-number">-1</span>] % (v + <span class="hljs-number">1</span>)
+	segH := sumgrid[r<span class="hljs-number">-1</span>][c<span class="hljs-number">-1</span>] / (h + <span class="hljs-number">1</span>)
+	segHRem := sumgrid[r<span class="hljs-number">-1</span>][c<span class="hljs-number">-1</span>] % (h + <span class="hljs-number">1</span>)
+	<span class="hljs-keyword">if</span> segVRem &gt; <span class="hljs-number">0</span> || segHRem &gt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+	}
+	vSegs := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">1</span>, v+<span class="hljs-number">1</span>)
+	hSegs := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">1</span>, h+<span class="hljs-number">1</span>)
+	vPtr := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> cV := <span class="hljs-number">1</span>; cV &lt; v+<span class="hljs-number">1</span>; cV++ {
+		<span class="hljs-keyword">for</span> ; sumgrid[r<span class="hljs-number">-1</span>][vPtr] &lt; segV*cV; vPtr++ {
+		}
+		<span class="hljs-keyword">if</span> sumgrid[r<span class="hljs-number">-1</span>][vPtr] != segV*cV {
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+		}
+		vSegs = <span class="hljs-built_in">append</span>(vSegs, vPtr+<span class="hljs-number">1</span>)
+	}
+	hPtr := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> cH := <span class="hljs-number">1</span>; cH &lt; h+<span class="hljs-number">1</span>; cH++ {
+		<span class="hljs-keyword">for</span> ; sumgrid[hPtr][c<span class="hljs-number">-1</span>] &lt; segH*cH; hPtr++ {
+		}
+		<span class="hljs-keyword">if</span> sumgrid[hPtr][c<span class="hljs-number">-1</span>] != segH*cH {
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+		}
+		hSegs = <span class="hljs-built_in">append</span>(hSegs, hPtr+<span class="hljs-number">1</span>)
+	}
+	debug(fmt.Sprintf(<span class="hljs-string">"vSegs = %v, hSegs = %v"</span>, vSegs, hSegs))
+	expectRegionSum := <span class="hljs-number">-1</span>
+	<span class="hljs-keyword">for</span> cV := <span class="hljs-number">0</span>; cV &lt; <span class="hljs-built_in">len</span>(vSegs); cV++ {
+		<span class="hljs-keyword">for</span> cH := <span class="hljs-number">0</span>; cH &lt; <span class="hljs-built_in">len</span>(hSegs); cH++ {
+			startX := vSegs[cV]
+			startY := hSegs[cH]
+			<span class="hljs-keyword">var</span> endX, endY <span class="hljs-keyword">int</span> <span class="hljs-comment">// non-inclusive</span>
+			<span class="hljs-keyword">if</span> cV == <span class="hljs-built_in">len</span>(vSegs)<span class="hljs-number">-1</span> {
+				endX = c
+			} <span class="hljs-keyword">else</span> {
+				endX = vSegs[cV+<span class="hljs-number">1</span>]
+			}
+			<span class="hljs-keyword">if</span> cH == <span class="hljs-built_in">len</span>(hSegs)<span class="hljs-number">-1</span> {
+				endY = r
+			} <span class="hljs-keyword">else</span> {
+				endY = hSegs[cH+<span class="hljs-number">1</span>]
+			}
+			regionSum := sumgrid[endY<span class="hljs-number">-1</span>][endX<span class="hljs-number">-1</span>]
+			<span class="hljs-keyword">if</span> startX &gt; <span class="hljs-number">0</span> {
+				regionSum -= sumgrid[endY<span class="hljs-number">-1</span>][startX<span class="hljs-number">-1</span>]
+			}
+			<span class="hljs-keyword">if</span> startY &gt; <span class="hljs-number">0</span> {
+				regionSum -= sumgrid[startY<span class="hljs-number">-1</span>][endX<span class="hljs-number">-1</span>]
+			}
+			<span class="hljs-keyword">if</span> startX &gt; <span class="hljs-number">0</span> &amp;&amp; startY &gt; <span class="hljs-number">0</span> {
+				regionSum += sumgrid[startY<span class="hljs-number">-1</span>][startX<span class="hljs-number">-1</span>]
+			}
+			<span class="hljs-keyword">if</span> expectRegionSum == <span class="hljs-number">-1</span> {
+				expectRegionSum = regionSum
+			} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> expectRegionSum != regionSum {
+				<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+			}
+		}
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Other files</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sketch.in" target="_blank">sketch.in</a>:</div><a class="download" href="files/sketch.in" title="Download original" download="sketch.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1A/1/sketch.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">2
+4 7 2 2
+.......
+.@.....
+...@...
+......@
+3 3 1 1
+@.@
+..@
+@..
+</code></pre></body></html>

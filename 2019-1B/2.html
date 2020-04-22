@@ -1,0 +1,96 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2019-1B Problem B - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2019-1B Problem B</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1B/2/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> t, w <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;t, &amp;w)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; t; i++ {
+		test(w)
+	}
+}
+
+<span class="hljs-keyword">var</span> solutionMatrix [][]<span class="hljs-keyword">float64</span> = [][]<span class="hljs-keyword">float64</span>{{<span class="hljs-number">1.0</span> / <span class="hljs-number">10.0</span>, <span class="hljs-number">-1.0</span> / <span class="hljs-number">10.0</span>, <span class="hljs-number">-1.0</span> / <span class="hljs-number">20.0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1.0</span> / <span class="hljs-number">40.0</span>}, {<span class="hljs-number">-6.0</span> / <span class="hljs-number">5.0</span>, <span class="hljs-number">6.0</span> / <span class="hljs-number">5.0</span>, <span class="hljs-number">1.0</span> / <span class="hljs-number">10.0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">-1.0</span> / <span class="hljs-number">20.0</span>}, {<span class="hljs-number">-2.0</span> / <span class="hljs-number">5.0</span>, <span class="hljs-number">-3.0</span> / <span class="hljs-number">5.0</span>, <span class="hljs-number">6.0</span> / <span class="hljs-number">5.0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">-1.0</span> / <span class="hljs-number">10.0</span>}, {<span class="hljs-number">8.0</span> / <span class="hljs-number">5.0</span>, <span class="hljs-number">-8.0</span> / <span class="hljs-number">5.0</span>, <span class="hljs-number">-4.0</span> / <span class="hljs-number">5.0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">-1.0</span> / <span class="hljs-number">10.0</span>}, {<span class="hljs-number">-8.0</span> / <span class="hljs-number">5.0</span>, <span class="hljs-number">8.0</span> / <span class="hljs-number">5.0</span>, <span class="hljs-number">4.0</span> / <span class="hljs-number">5.0</span>, <span class="hljs-number">-1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">-2.0</span> / <span class="hljs-number">5.0</span>}, {<span class="hljs-number">12.0</span> / <span class="hljs-number">5.0</span>, <span class="hljs-number">-2.0</span> / <span class="hljs-number">5.0</span>, <span class="hljs-number">-6.0</span> / <span class="hljs-number">5.0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">-1</span>, <span class="hljs-number">3.0</span> / <span class="hljs-number">5.0</span>}}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">Round</span><span class="hljs-params">(f <span class="hljs-keyword">float64</span>)</span> <span class="hljs-title">float64</span></span> {
+	intPart := <span class="hljs-keyword">int64</span>(f)
+	f -= <span class="hljs-keyword">float64</span>(intPart)
+	<span class="hljs-keyword">if</span> f &gt;= <span class="hljs-number">0.5</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-keyword">float64</span>(intPart + <span class="hljs-number">1</span>)
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-keyword">float64</span>(intPart)
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">Abs</span><span class="hljs-params">(f <span class="hljs-keyword">float64</span>)</span> <span class="hljs-title">float64</span></span> {
+	<span class="hljs-keyword">if</span> f &lt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">return</span> -f
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> f
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">(w <span class="hljs-keyword">int</span>)</span></span> {
+	<span class="hljs-keyword">if</span> w == <span class="hljs-number">6</span> {
+		days := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">6</span>)
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">1</span>; i &lt;= <span class="hljs-number">6</span>; i++ {
+			fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, i)
+			stdout.Flush()
+			<span class="hljs-keyword">var</span> response <span class="hljs-keyword">int</span>
+			mustReadLineOfInts(&amp;response)
+			<span class="hljs-keyword">if</span> response == <span class="hljs-number">-1</span> {
+				os.Exit(<span class="hljs-number">1</span>)
+			}
+			days[i<span class="hljs-number">-1</span>] = response
+		}
+		solution := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">6</span>)
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">6</span>; i++ {
+			row := solutionMatrix[i]
+			<span class="hljs-keyword">var</span> sum <span class="hljs-keyword">float64</span>
+			<span class="hljs-keyword">for</span> j := <span class="hljs-number">0</span>; j &lt; <span class="hljs-number">6</span>; j++ {
+				sum += row[j] * <span class="hljs-keyword">float64</span>(days[j])
+			}
+			solution[i] = <span class="hljs-keyword">int</span>(Round(sum))
+		}
+		solutionStrings := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">string</span>, <span class="hljs-number">6</span>)
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">6</span>; i++ {
+			solutionStrings[i] = strconv.Itoa(solution[i])
+		}
+		stdout.WriteString(strings.Join(solutionStrings, <span class="hljs-string">" "</span>))
+		stdout.WriteByte(<span class="hljs-string">'\n'</span>)
+		stdout.Flush()
+		<span class="hljs-keyword">var</span> response <span class="hljs-keyword">int</span>
+		mustReadLineOfInts(&amp;response)
+		<span class="hljs-keyword">if</span> response != <span class="hljs-number">1</span> {
+			os.Exit(<span class="hljs-number">0</span>)
+		}
+	} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> w == <span class="hljs-number">2</span> {
+		stdout.WriteString(<span class="hljs-string">"200\n"</span>)
+		stdout.Flush()
+		line := mustReadLine()
+		rspTo200, _ := strconv.ParseUint(line, <span class="hljs-number">10</span>, <span class="hljs-number">64</span>)
+		stdout.WriteString(<span class="hljs-string">"55\n"</span>)
+		stdout.Flush()
+		line = mustReadLine()
+		rspTo55, _ := strconv.ParseUint(line, <span class="hljs-number">10</span>, <span class="hljs-number">64</span>)
+		a6 := (rspTo200 &gt;&gt; <span class="hljs-number">33</span>) % <span class="hljs-number">128</span> <span class="hljs-comment">// My previous attempts had 127 in here, which led to confusingly wrong answer.</span>
+		a5 := (rspTo200 &gt;&gt; <span class="hljs-number">40</span>) % <span class="hljs-number">128</span> <span class="hljs-comment">// However the code is still wrong even after fixing this.</span>
+		a4 := (rspTo200 &gt;&gt; <span class="hljs-number">50</span>) % <span class="hljs-number">128</span>
+		a1 := (rspTo55 &gt;&gt; <span class="hljs-number">55</span>) % <span class="hljs-number">128</span>
+		a2 := (rspTo55 &gt;&gt; <span class="hljs-number">27</span>) % <span class="hljs-number">128</span>
+		<span class="hljs-comment">// a3 := ((rspTo55 &gt;&gt; 18) - (a4 &gt;&gt; 5)) % 128</span>
+		<span class="hljs-comment">//  Then I realized this, but it is still wrong, because addition not only affect the bits being added, but it may also</span>
+		<span class="hljs-comment">//  carry on to one more bit to the left. Therefore, one should only start "chopping bits off" once all arithmetics are</span>
+		<span class="hljs-comment">//  done. The correct code should be:</span>
+		a3 := ((rspTo55 - (a4 &lt;&lt; <span class="hljs-number">13</span>) - (a5 &lt;&lt; <span class="hljs-number">11</span>) - (a6 &lt;&lt; <span class="hljs-number">9</span>)) &gt;&gt; <span class="hljs-number">18</span>) % <span class="hljs-number">128</span>
+		fmt.Fprintf(stdout, <span class="hljs-string">"%d %d %d %d %d %d\n"</span>, a1, a2, a3, a4, a5, a6)
+		stdout.Flush()
+		<span class="hljs-keyword">var</span> response <span class="hljs-keyword">int</span>
+		mustReadLineOfInts(&amp;response)
+		<span class="hljs-keyword">if</span> response != <span class="hljs-number">1</span> {
+			os.Exit(<span class="hljs-number">0</span>)
+		}
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-built_in">panic</span>(w)
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre></body></html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2019-qual Problem C - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2019-qual Problem C</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-qual/3/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> t <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;t)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; t; i++ {
+		stdout.WriteString(<span class="hljs-string">"Case #"</span>)
+		stdout.WriteString(strconv.Itoa(i + <span class="hljs-number">1</span>))
+		stdout.WriteString(<span class="hljs-string">": "</span>)
+		test()
+	}
+}
+
+<span class="hljs-keyword">type</span> PrimeList []*big.Int
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(pl *PrimeList)</span> <span class="hljs-title">Len</span><span class="hljs-params">()</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">return</span> <span class="hljs-built_in">len</span>(*pl)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(pl *PrimeList)</span> <span class="hljs-title">Less</span><span class="hljs-params">(i <span class="hljs-keyword">int</span>, j <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+	<span class="hljs-keyword">return</span> (*pl)[i].Cmp((*pl)[j]) &lt; <span class="hljs-number">0</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(pl *PrimeList)</span> <span class="hljs-title">Swap</span><span class="hljs-params">(i <span class="hljs-keyword">int</span>, j <span class="hljs-keyword">int</span>)</span></span> {
+	(*pl)[i], (*pl)[j] = (*pl)[j], (*pl)[i]
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(pl PrimeList)</span> <span class="hljs-title">SearchFor</span><span class="hljs-params">(i *big.Int)</span> <span class="hljs-title">int</span></span> {
+	res := sort.Search(<span class="hljs-built_in">len</span>(pl), <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(idx <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+		<span class="hljs-keyword">return</span> pl[idx].Cmp(i) &gt;= <span class="hljs-number">0</span>
+	})
+	<span class="hljs-keyword">if</span> pl[res].Cmp(i) != <span class="hljs-number">0</span> {
+		debug(fmt.Sprintf(<span class="hljs-string">"Warning: searched for %v, found index = %v, pl[index] = %v which does not equal the query."</span>, i.Text(<span class="hljs-number">10</span>), res, pl[res].Text(<span class="hljs-number">10</span>)))
+	}
+	<span class="hljs-keyword">return</span> res
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	zero := big.NewInt(<span class="hljs-number">0</span>)
+	<span class="hljs-keyword">var</span> L <span class="hljs-keyword">int</span>
+	line := strings.Split(mustReadLine(), <span class="hljs-string">" "</span>)
+	<span class="hljs-comment">// N, success := big.NewInt(0).SetString(line[0], 10)</span>
+	<span class="hljs-comment">// if !success {</span>
+	<span class="hljs-comment">// 	panic("!")</span>
+	<span class="hljs-comment">// }</span>
+	L = mustAtoi(line[<span class="hljs-number">1</span>])
+	cipherText := <span class="hljs-built_in">make</span>([]*big.Int, <span class="hljs-number">0</span>, L)
+	line = strings.Split(mustReadLine(), <span class="hljs-string">" "</span>)
+	<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(line) != L {
+		<span class="hljs-built_in">panic</span>(<span class="hljs-string">"length mismatch."</span>)
+	}
+	primesFound := <span class="hljs-built_in">make</span>(PrimeList, <span class="hljs-number">0</span>)
+	<span class="hljs-keyword">for</span> _, numStr := <span class="hljs-keyword">range</span> line {
+		bn, success := big.NewInt(<span class="hljs-number">0</span>).SetString(numStr, <span class="hljs-number">10</span>)
+		<span class="hljs-keyword">if</span> !success {
+			<span class="hljs-built_in">panic</span>(<span class="hljs-string">"!"</span>)
+		}
+		cipherText = <span class="hljs-built_in">append</span>(cipherText, bn)
+	}
+	problematicProducts := <span class="hljs-built_in">make</span>([]*big.Int, <span class="hljs-number">0</span>)
+	firstNonProblematicCipherIndex := <span class="hljs-number">-1</span>
+	lastNonProblematicCipherIndex := <span class="hljs-number">-1</span>
+	<span class="hljs-keyword">for</span> k := <span class="hljs-number">0</span>; k &lt; L<span class="hljs-number">-1</span>; k++ {
+		<span class="hljs-keyword">if</span> cipherText[k].Cmp(cipherText[k+<span class="hljs-number">1</span>]) == <span class="hljs-number">0</span> {
+			problematicProducts = <span class="hljs-built_in">append</span>(problematicProducts, cipherText[k])
+			<span class="hljs-keyword">continue</span>
+		}
+		<span class="hljs-keyword">if</span> firstNonProblematicCipherIndex == <span class="hljs-number">-1</span> {
+			firstNonProblematicCipherIndex = k
+		}
+		lastNonProblematicCipherIndex = k + <span class="hljs-number">1</span>
+		p := big.NewInt(<span class="hljs-number">0</span>).GCD(<span class="hljs-literal">nil</span>, <span class="hljs-literal">nil</span>, cipherText[k], cipherText[k+<span class="hljs-number">1</span>])
+		primesFound = <span class="hljs-built_in">append</span>(primesFound, p)
+	}
+	firstPrimeFound := primesFound[<span class="hljs-number">0</span>]
+	lastPrimeFound := primesFound[<span class="hljs-built_in">len</span>(primesFound)<span class="hljs-number">-1</span>]
+	<span class="hljs-keyword">var</span> firstPrime *big.Int = <span class="hljs-literal">nil</span>
+	<span class="hljs-keyword">if</span> firstNonProblematicCipherIndex%<span class="hljs-number">2</span> == <span class="hljs-number">0</span> {
+		firstPrime = big.NewInt(<span class="hljs-number">0</span>).Div(cipherText[firstNonProblematicCipherIndex], firstPrimeFound)
+	} <span class="hljs-keyword">else</span> {
+		firstPrime = firstPrimeFound
+	}
+	lastPrime := big.NewInt(<span class="hljs-number">0</span>).Div(cipherText[lastNonProblematicCipherIndex], lastPrimeFound)
+	primesFound = <span class="hljs-built_in">append</span>(primesFound, firstPrime, lastPrime)
+	buffer := big.NewInt(<span class="hljs-number">0</span>)
+	buffer2 := big.NewInt(<span class="hljs-number">0</span>)
+	<span class="hljs-keyword">for</span> _, prod := <span class="hljs-keyword">range</span> problematicProducts {
+		<span class="hljs-keyword">for</span> _, primeToTry := <span class="hljs-keyword">range</span> primesFound {
+			buffer, m := buffer.DivMod(prod, primeToTry, buffer2)
+			<span class="hljs-keyword">if</span> m.Cmp(zero) == <span class="hljs-number">0</span> {
+				q := big.NewInt(<span class="hljs-number">0</span>).Set(buffer)
+				primesFound = <span class="hljs-built_in">append</span>(primesFound, q)
+				<span class="hljs-keyword">break</span>
+			}
+		}
+	}
+	sort.Sort(&amp;primesFound)
+	last := zero
+	nPrimesFound := <span class="hljs-built_in">make</span>(PrimeList, <span class="hljs-number">0</span>)
+	<span class="hljs-keyword">for</span> _, p := <span class="hljs-keyword">range</span> primesFound {
+		<span class="hljs-keyword">if</span> p.Cmp(last) != <span class="hljs-number">0</span> {
+			nPrimesFound = <span class="hljs-built_in">append</span>(nPrimesFound, p)
+			last = p
+		}
+	}
+	primesFound = nPrimesFound
+	<span class="hljs-comment">//debug(fmt.Sprintf("%v", primesFound))</span>
+	<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(primesFound) != <span class="hljs-number">26</span> {
+		debug(<span class="hljs-string">"Warning: not exactly 26 primes! Got "</span> + strconv.Itoa(<span class="hljs-built_in">len</span>(primesFound)))
+	}
+	lastDecrypted := primesFound.SearchFor(firstPrime)
+	stdout.WriteByte(<span class="hljs-string">'A'</span> + <span class="hljs-keyword">byte</span>(lastDecrypted))
+	<span class="hljs-keyword">for</span> _, c := <span class="hljs-keyword">range</span> cipherText {
+		buffer := buffer.Div(c, primesFound[lastDecrypted])
+		t := primesFound.SearchFor(buffer)
+		lastDecrypted = t
+		stdout.WriteByte(<span class="hljs-string">'A'</span> + <span class="hljs-keyword">byte</span>(t))
+	}
+	stdout.WriteByte(<span class="hljs-string">'\n'</span>)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">encrypt</span><span class="hljs-params">(primes []<span class="hljs-keyword">int</span>, msg <span class="hljs-keyword">string</span>)</span> []<span class="hljs-title">int</span></span> {
+	nums := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(msg))
+	<span class="hljs-keyword">for</span> _, char := <span class="hljs-keyword">range</span> msg {
+		<span class="hljs-keyword">if</span> char-<span class="hljs-string">'A'</span> &gt; <span class="hljs-number">26</span> {
+			<span class="hljs-keyword">continue</span>
+		}
+		nums = <span class="hljs-built_in">append</span>(nums, primes[char-<span class="hljs-string">'A'</span>])
+	}
+	c := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(msg)<span class="hljs-number">-1</span>)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(nums)<span class="hljs-number">-1</span>; i++ {
+		c = <span class="hljs-built_in">append</span>(c, nums[i]*nums[i+<span class="hljs-number">1</span>])
+	}
+	<span class="hljs-keyword">return</span> c
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-qual/3/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">2
+103 31
+217 1891 4819 2291 2987 3811 1739 2491 4717 445 65 1079 8383 5353 901 187 649 1003 697 3239 7663 291 123 779 1007 3551 1943 2117 1679 989 3053
+10000 25
+3292937 175597 18779 50429 375469 1651121 2102 3722 2376497 611683 489059 2328901 3150061 829981 421301 76409 38477 291931 730241 959821 1664197 3057407 4267589 4729181 5335543
+</code></pre><h2>Other files</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/test-generator/cmd.go" target="_blank">test-generator/cmd.go</a>:</div><a class="download" href="files/test-generator/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-qual/3/test-generator/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">encrypt</span><span class="hljs-params">(primes []<span class="hljs-keyword">int</span>, msg <span class="hljs-keyword">string</span>)</span> []<span class="hljs-title">int</span></span> {
+	nums := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(msg))
+	<span class="hljs-keyword">for</span> _, char := <span class="hljs-keyword">range</span> msg {
+		<span class="hljs-keyword">if</span> char-<span class="hljs-string">'A'</span> &gt; <span class="hljs-number">26</span> {
+			<span class="hljs-keyword">continue</span>
+		}
+		nums = <span class="hljs-built_in">append</span>(nums, primes[char-<span class="hljs-string">'A'</span>])
+	}
+	c := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(msg)<span class="hljs-number">-1</span>)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(nums)<span class="hljs-number">-1</span>; i++ {
+		c = <span class="hljs-built_in">append</span>(c, nums[i]*nums[i+<span class="hljs-number">1</span>])
+	}
+	<span class="hljs-keyword">return</span> c
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span> {
+	fin, err := os.OpenFile(<span class="hljs-string">"generated.in"</span>, os.O_WRONLY|os.O_CREATE, <span class="hljs-number">0666</span>)
+	<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+		<span class="hljs-built_in">panic</span>(err)
+	}
+	fout, err := os.OpenFile(<span class="hljs-string">"generated.out"</span>, os.O_WRONLY|os.O_CREATE, <span class="hljs-number">0666</span>)
+	<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+		<span class="hljs-built_in">panic</span>(err)
+	}
+	in := bufio.NewWriter(fin)
+	out := bufio.NewWriter(fout)
+	t := <span class="hljs-number">1000000</span>
+	N := <span class="hljs-number">10000</span>
+	in.WriteString(strconv.Itoa(t))
+	in.WriteByte(<span class="hljs-string">'\n'</span>)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; t; i++ {
+		in.WriteString(strconv.Itoa(N))
+		in.WriteByte(<span class="hljs-string">' '</span>)
+		L := rand.Intn(<span class="hljs-number">100</span>) + <span class="hljs-number">25</span>
+		in.WriteString(strconv.Itoa(L))
+		in.WriteByte(<span class="hljs-string">'\n'</span>)
+		out.WriteString(<span class="hljs-string">"Case #"</span>)
+		out.WriteString(strconv.Itoa(i + <span class="hljs-number">1</span>))
+		out.WriteString(<span class="hljs-string">": "</span>)
+		primesList := []<span class="hljs-keyword">int</span>{<span class="hljs-number">3</span>, <span class="hljs-number">5</span>, <span class="hljs-number">7</span>, <span class="hljs-number">11</span>, <span class="hljs-number">13</span>, <span class="hljs-number">17</span>, <span class="hljs-number">19</span>, <span class="hljs-number">23</span>, <span class="hljs-number">29</span>, <span class="hljs-number">31</span>, <span class="hljs-number">37</span>, <span class="hljs-number">41</span>, <span class="hljs-number">43</span>, <span class="hljs-number">47</span>, <span class="hljs-number">53</span>, <span class="hljs-number">59</span>, <span class="hljs-number">61</span>, <span class="hljs-number">67</span>, <span class="hljs-number">71</span>, <span class="hljs-number">73</span>, <span class="hljs-number">79</span>, <span class="hljs-number">83</span>, <span class="hljs-number">89</span>, <span class="hljs-number">97</span>, <span class="hljs-number">101</span>, <span class="hljs-number">103</span>}
+		msg := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">rune</span>, <span class="hljs-number">0</span>, L+<span class="hljs-number">1</span>)
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(primesList); i++ {
+			msg = <span class="hljs-built_in">append</span>(msg, <span class="hljs-string">'A'</span>+<span class="hljs-keyword">rune</span>(i))
+		}
+		<span class="hljs-keyword">for</span> i := <span class="hljs-built_in">len</span>(msg); i &lt; L+<span class="hljs-number">1</span>; i++ {
+			idx := rand.Intn(<span class="hljs-number">26</span>)
+			msg = <span class="hljs-built_in">append</span>(msg, <span class="hljs-string">'A'</span>+<span class="hljs-keyword">rune</span>(idx))
+		}
+		rand.Shuffle(<span class="hljs-built_in">len</span>(msg), <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(i, j <span class="hljs-keyword">int</span>)</span></span> {
+			msg[i], msg[j] = msg[j], msg[i]
+		})
+		out.WriteString(<span class="hljs-keyword">string</span>(msg))
+		out.WriteByte(<span class="hljs-string">'\n'</span>)
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(msg)<span class="hljs-number">-1</span>; i++ {
+			prod := primesList[<span class="hljs-keyword">byte</span>(msg[i])-<span class="hljs-string">'A'</span>] * primesList[<span class="hljs-keyword">byte</span>(msg[i+<span class="hljs-number">1</span>])-<span class="hljs-string">'A'</span>]
+			<span class="hljs-keyword">if</span> i != <span class="hljs-number">0</span> {
+				in.WriteByte(<span class="hljs-string">' '</span>)
+			}
+			in.WriteString(strconv.Itoa(prod))
+		}
+		in.WriteByte(<span class="hljs-string">'\n'</span>)
+	}
+	out.Flush()
+	in.Flush()
+}
+</code></pre></body></html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2017-1A Problem B - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2017-1A Problem B</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1A/2/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> t <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;t)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; t; i++ {
+		fmt.Fprintf(stdout, <span class="hljs-string">"Case #%d: "</span>, i+<span class="hljs-number">1</span>)
+		<span class="hljs-keyword">if</span> i == <span class="hljs-number">27</span> {
+			stdout.Flush()
+		}
+		fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, test())
+	}
+}
+
+<span class="hljs-keyword">type</span> Package <span class="hljs-keyword">struct</span> {
+	qty      <span class="hljs-keyword">int</span>
+	canDoMin <span class="hljs-keyword">int</span>
+	canDoMax <span class="hljs-keyword">int</span>
+	circled  <span class="hljs-keyword">int</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(p *Package)</span> <span class="hljs-title">calc</span><span class="hljs-params">(req <span class="hljs-keyword">int</span>)</span></span> {
+	p.canDoMax = <span class="hljs-keyword">int</span>(math.Floor(<span class="hljs-keyword">float64</span>(p.qty) / (<span class="hljs-number">0.9</span> * <span class="hljs-keyword">float64</span>(req))))
+	p.canDoMin = <span class="hljs-keyword">int</span>(math.Ceil(<span class="hljs-keyword">float64</span>(p.qty) / (<span class="hljs-number">1.1</span> * <span class="hljs-keyword">float64</span>(req))))
+	<span class="hljs-keyword">if</span> req*(p.canDoMax+<span class="hljs-number">1</span>)*<span class="hljs-number">9</span>/<span class="hljs-number">10</span> &lt;= p.qty {
+		p.canDoMax++
+	}
+	<span class="hljs-keyword">if</span> req*(p.canDoMin<span class="hljs-number">-1</span>)*<span class="hljs-number">11</span>/<span class="hljs-number">10</span> &gt;= p.qty {
+		p.canDoMin++
+	}
+	<span class="hljs-keyword">if</span> p.canDoMax == <span class="hljs-number">0</span> {
+		p.canDoMin = <span class="hljs-number">0</span>
+		p.canDoMax = <span class="hljs-number">-1</span>
+	}
+}
+
+<span class="hljs-keyword">type</span> Packages []Package
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(p Packages)</span> <span class="hljs-title">Len</span><span class="hljs-params">()</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">return</span> <span class="hljs-built_in">len</span>(p)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(p Packages)</span> <span class="hljs-title">Less</span><span class="hljs-params">(i <span class="hljs-keyword">int</span>, j <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+	<span class="hljs-keyword">return</span> p[i].qty &lt; p[j].qty
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(p Packages)</span> <span class="hljs-title">Swap</span><span class="hljs-params">(i <span class="hljs-keyword">int</span>, j <span class="hljs-keyword">int</span>)</span></span> {
+	p[i], p[j] = p[j], p[i]
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">var</span> N, P <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;N, &amp;P)
+	reqs := mustReadLineOfIntsIntoArray()
+	assert(<span class="hljs-built_in">len</span>(reqs) == N)
+	packages := <span class="hljs-built_in">make</span>([]Packages, N)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i++ {
+		pkgs := <span class="hljs-built_in">make</span>(Packages, P)
+		q := mustReadLineOfIntsIntoArray()
+		assert(<span class="hljs-built_in">len</span>(q) == P)
+		<span class="hljs-keyword">for</span> j := <span class="hljs-number">0</span>; j &lt; P; j++ {
+			pkgs[j].qty = q[j]
+			pkgs[j].calc(reqs[i])
+		}
+		sort.Sort(pkgs)
+		newPkgs := <span class="hljs-built_in">make</span>(Packages, <span class="hljs-number">0</span>, P)
+		<span class="hljs-keyword">for</span> _, pkg := <span class="hljs-keyword">range</span> pkgs {
+			<span class="hljs-keyword">if</span> pkg.canDoMin &lt;= pkg.canDoMax {
+				newPkgs = <span class="hljs-built_in">append</span>(newPkgs, pkg)
+			}
+		}
+		packages[i] = newPkgs
+	}
+	<span class="hljs-keyword">for</span> _, pkgs := <span class="hljs-keyword">range</span> packages {
+		<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(pkgs) == <span class="hljs-number">0</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+		}
+	}
+	debug(fmt.Sprintf(<span class="hljs-string">"%v"</span>, packages))
+	<span class="hljs-keyword">if</span> N == <span class="hljs-number">1</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-built_in">len</span>(packages[<span class="hljs-number">0</span>])
+	}
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">1</span>; i &lt; N; i++ {
+		prevRow := packages[i<span class="hljs-number">-1</span>]
+		thisRow := packages[i]
+		<span class="hljs-keyword">for</span> {
+			<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(prevRow) == <span class="hljs-number">0</span> || <span class="hljs-built_in">len</span>(thisRow) == <span class="hljs-number">0</span> {
+				<span class="hljs-keyword">break</span>
+			}
+			<span class="hljs-keyword">if</span> thisRow[<span class="hljs-number">0</span>].canDoMax &lt; prevRow[<span class="hljs-number">0</span>].canDoMin {
+				thisRow = thisRow[<span class="hljs-number">1</span>:]
+				<span class="hljs-keyword">continue</span>
+			}
+			<span class="hljs-keyword">if</span> thisRow[<span class="hljs-number">0</span>].canDoMin &gt; prevRow[<span class="hljs-number">0</span>].canDoMax {
+				prevRow = prevRow[<span class="hljs-number">1</span>:]
+				<span class="hljs-keyword">continue</span>
+			}
+			<span class="hljs-keyword">if</span> prevRow[<span class="hljs-number">0</span>].circled != <span class="hljs-number">0</span> &amp;&amp; thisRow[<span class="hljs-number">0</span>].canDoMax &lt; prevRow[<span class="hljs-number">0</span>].circled {
+				thisRow = thisRow[<span class="hljs-number">1</span>:]
+				<span class="hljs-keyword">continue</span>
+			}
+			<span class="hljs-keyword">if</span> i != <span class="hljs-number">1</span> {
+				<span class="hljs-keyword">if</span> prevRow[<span class="hljs-number">0</span>].circled != <span class="hljs-number">0</span> {
+					assert(prevRow[<span class="hljs-number">0</span>].canDoMin &lt;= prevRow[<span class="hljs-number">0</span>].circled)
+					prevRow[<span class="hljs-number">0</span>].canDoMin = prevRow[<span class="hljs-number">0</span>].circled
+					assert(prevRow[<span class="hljs-number">0</span>].canDoMax &gt;= prevRow[<span class="hljs-number">0</span>].canDoMin)
+				} <span class="hljs-keyword">else</span> {
+					prevRow = prevRow[<span class="hljs-number">1</span>:]
+					<span class="hljs-keyword">continue</span>
+				}
+			}
+			<span class="hljs-keyword">if</span> thisRow[<span class="hljs-number">0</span>].canDoMin &lt; prevRow[<span class="hljs-number">0</span>].canDoMin {
+				prevRow[<span class="hljs-number">0</span>].circled = prevRow[<span class="hljs-number">0</span>].canDoMin
+				thisRow[<span class="hljs-number">0</span>].circled = prevRow[<span class="hljs-number">0</span>].canDoMin
+			} <span class="hljs-keyword">else</span> {
+				thisRow[<span class="hljs-number">0</span>].circled = thisRow[<span class="hljs-number">0</span>].canDoMin
+				prevRow[<span class="hljs-number">0</span>].circled = thisRow[<span class="hljs-number">0</span>].canDoMin
+			}
+			assert(thisRow[<span class="hljs-number">0</span>].circled &gt;= thisRow[<span class="hljs-number">0</span>].canDoMin)
+			assert(thisRow[<span class="hljs-number">0</span>].circled &lt;= thisRow[<span class="hljs-number">0</span>].canDoMax)
+			assert(prevRow[<span class="hljs-number">0</span>].circled &gt;= prevRow[<span class="hljs-number">0</span>].canDoMin)
+			assert(prevRow[<span class="hljs-number">0</span>].circled &lt;= prevRow[<span class="hljs-number">0</span>].canDoMax)
+			thisRow = thisRow[<span class="hljs-number">1</span>:]
+			prevRow = prevRow[<span class="hljs-number">1</span>:]
+		}
+	}
+	lastRow := packages[N<span class="hljs-number">-1</span>]
+	debug(fmt.Sprintf(<span class="hljs-string">"%v"</span>, packages))
+	kits := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> _, p := <span class="hljs-keyword">range</span> lastRow {
+		<span class="hljs-keyword">if</span> p.circled != <span class="hljs-number">0</span> {
+			kits++
+		}
+	}
+	<span class="hljs-keyword">return</span> kits
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1A/2/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">6
+2 1
+500 300
+900
+660
+2 1
+500 300
+1500
+809
+2 2
+50 100
+450 449
+1100 1101
+2 1
+500 300
+300
+500
+1 8
+10
+11 13 17 11 16 14 12 18
+3 3
+70 80 90
+1260 1500 700
+800 1440 1600
+1700 1620 900
+</code></pre><h2>Other files</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sketch.in" target="_blank">sketch.in</a>:</div><a class="download" href="files/sketch.in" title="Download original" download="sketch.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1A/2/sketch.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">2
+2 2
+5 10
+45 50
+110 111
+2 3
+50 100
+449 450 500
+1000 1100 1101
+</code></pre></body></html>

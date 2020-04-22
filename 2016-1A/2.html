@@ -1,0 +1,40 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2016-1A Problem B - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2016-1A Problem B</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1A/2/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> N <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;N)
+	heightsSeen := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-keyword">int</span>]<span class="hljs-keyword">int</span>)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">2</span>*N<span class="hljs-number">-1</span>; i++ {
+		list := mustReadLineOfIntsIntoArray()
+		assert(<span class="hljs-built_in">len</span>(list) == N)
+		<span class="hljs-keyword">for</span> _, height := <span class="hljs-keyword">range</span> list {
+			heightsSeen[height]++
+		}
+	}
+	oddHeights := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">0</span>, N)
+	<span class="hljs-keyword">for</span> height, count := <span class="hljs-keyword">range</span> heightsSeen {
+		<span class="hljs-keyword">if</span> count%<span class="hljs-number">2</span> == <span class="hljs-number">1</span> {
+			oddHeights = <span class="hljs-built_in">append</span>(oddHeights, height)
+		}
+	}
+	sort.Ints(oddHeights)
+	strs := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">string</span>, <span class="hljs-number">0</span>, N)
+	<span class="hljs-keyword">for</span> _, oh := <span class="hljs-keyword">range</span> oddHeights {
+		strs = <span class="hljs-built_in">append</span>(strs, strconv.Itoa(oh))
+	}
+	stdout.WriteString(strings.Join(strs, <span class="hljs-string">" "</span>))
+	stdout.WriteByte(<span class="hljs-string">'\n'</span>)
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1A/2/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">1
+3
+1 2 3
+2 3 5
+3 5 6
+2 3 4
+1 2 3
+</code></pre></body></html>

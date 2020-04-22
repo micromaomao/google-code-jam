@@ -1,0 +1,429 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2018-1B Problem B - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2018-1B Problem B</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/2/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-keyword">type</span> Sign <span class="hljs-keyword">struct</span> {
+	d               <span class="hljs-keyword">int</span>
+	a, b            <span class="hljs-keyword">int</span>
+	m, n            <span class="hljs-keyword">int</span>
+	mLen, nLen      <span class="hljs-keyword">int</span>
+	setWithThisMLen <span class="hljs-keyword">int</span>
+	setWithThisNLen <span class="hljs-keyword">int</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> numSigns <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;numSigns)
+	signs := <span class="hljs-built_in">make</span>([]Sign, numSigns)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; numSigns; i++ {
+		<span class="hljs-keyword">var</span> d, a, b <span class="hljs-keyword">int</span>
+		mustReadLineOfInts(&amp;d, &amp;a, &amp;b)
+		m := d + a
+		n := d - b
+		signs[i] = Sign{d, a, b, m, n, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>}
+		<span class="hljs-comment">// debug(fmt.Sprintf("m=%v, n=%v", m, n))</span>
+	}
+	maxValidSetLen := <span class="hljs-number">0</span>
+	maxSetCount := <span class="hljs-number">0</span>
+	<span class="hljs-comment">// mLen pass</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(signs); {
+		currentM := signs[i].m
+		mLen := <span class="hljs-number">0</span>
+		<span class="hljs-keyword">for</span> ; i+mLen &lt; <span class="hljs-built_in">len</span>(signs) &amp;&amp; signs[i+mLen].m == currentM; mLen++ {
+		}
+		<span class="hljs-keyword">for</span> j := i; j &lt; i+mLen; j++ {
+			signs[j].mLen = mLen - (j - i)
+		}
+		i += mLen
+	}
+	<span class="hljs-comment">// nLen pass</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(signs); {
+		currentN := signs[i].n
+		nLen := <span class="hljs-number">0</span>
+		<span class="hljs-keyword">for</span> ; i+nLen &lt; <span class="hljs-built_in">len</span>(signs) &amp;&amp; signs[i+nLen].n == currentN; nLen++ {
+		}
+		<span class="hljs-keyword">for</span> j := i; j &lt; i+nLen; j++ {
+			signs[j].nLen = nLen - (j - i)
+		}
+		i += nLen
+	}
+
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(signs); i++ {
+		startSign := &amp;signs[i]
+		<span class="hljs-keyword">var</span> setSize, m, n <span class="hljs-keyword">int</span>
+		<span class="hljs-keyword">var</span> mSet, nSet <span class="hljs-keyword">bool</span>
+		continueWith := <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(checkM <span class="hljs-keyword">bool</span>)</span> <span class="hljs-title">int</span></span> {
+			initCheckM := checkM
+			sLen := <span class="hljs-number">0</span>
+			<span class="hljs-keyword">for</span> i+sLen &lt; <span class="hljs-built_in">len</span>(signs) {
+				s := &amp;signs[i+sLen]
+				<span class="hljs-keyword">if</span> checkM {
+					<span class="hljs-keyword">if</span> s.setWithThisMLen != <span class="hljs-number">0</span> {
+						sLen = s.setWithThisMLen
+						<span class="hljs-keyword">return</span> sLen
+					}
+					<span class="hljs-keyword">if</span> mSet &amp;&amp; s.m != m {
+						<span class="hljs-keyword">break</span>
+					} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> !mSet {
+						m = s.m
+						mSet = <span class="hljs-literal">true</span>
+					}
+					sLen += s.mLen
+				} <span class="hljs-keyword">else</span> {
+					<span class="hljs-keyword">if</span> s.setWithThisNLen != <span class="hljs-number">0</span> {
+						sLen = s.setWithThisNLen
+						<span class="hljs-keyword">return</span> sLen
+					}
+					<span class="hljs-keyword">if</span> nSet &amp;&amp; s.n != n {
+						<span class="hljs-keyword">break</span>
+					} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> !nSet {
+						n = s.n
+						nSet = <span class="hljs-literal">true</span>
+					}
+					sLen += s.nLen
+				}
+				checkM = !checkM
+			}
+			<span class="hljs-comment">// set setWithThisM/NLen</span>
+			checkM = initCheckM
+			newSLen := sLen
+			nextFlip := <span class="hljs-number">-1</span>
+			<span class="hljs-keyword">if</span> checkM {
+				nextFlip = i + signs[i].mLen
+			} <span class="hljs-keyword">else</span> {
+				nextFlip = i + signs[i].nLen
+			}
+			<span class="hljs-keyword">for</span> j := i; j &lt; i+sLen; j++ {
+				s := &amp;signs[j]
+				<span class="hljs-keyword">if</span> j == nextFlip {
+					checkM = !checkM
+					<span class="hljs-keyword">if</span> checkM {
+						nextFlip += s.mLen
+					} <span class="hljs-keyword">else</span> {
+						nextFlip += s.nLen
+					}
+				}
+				<span class="hljs-keyword">if</span> nextFlip &gt;= i+sLen {
+					<span class="hljs-keyword">break</span> <span class="hljs-comment">// ignore last segment.</span>
+				}
+				<span class="hljs-keyword">if</span> checkM {
+					s.setWithThisMLen = newSLen
+				} <span class="hljs-keyword">else</span> {
+					s.setWithThisNLen = newSLen
+				}
+				newSLen--
+			}
+			<span class="hljs-keyword">return</span> sLen
+		}
+		m = startSign.m
+		mSet = <span class="hljs-literal">true</span>
+		nSet = <span class="hljs-literal">false</span>
+		a := continueWith(<span class="hljs-literal">true</span>)
+		n = startSign.n
+		nSet = <span class="hljs-literal">true</span>
+		mSet = <span class="hljs-literal">false</span>
+		b := continueWith(<span class="hljs-literal">false</span>)
+		setSize = max(a, b)
+		<span class="hljs-keyword">if</span> maxValidSetLen &lt; setSize {
+			maxValidSetLen = setSize
+			maxSetCount = <span class="hljs-number">1</span>
+		} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> maxValidSetLen == setSize {
+			maxSetCount++
+		}
+	}
+	<span class="hljs-comment">// debug(fmt.Sprintf("%v", signs))</span>
+	fmt.Fprintf(stdout, <span class="hljs-string">"%d %d\n"</span>, maxValidSetLen, maxSetCount)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">max</span><span class="hljs-params">(a, b <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">if</span> a &lt; b {
+		<span class="hljs-keyword">return</span> b
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> a
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Wrong solutions</h2><h3>wrong-1</h3><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/wrong-1/cmd.go" target="_blank">wrong-1/cmd.go</a>:</div><a class="download" href="files/wrong-1/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/2/wrong-1/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-keyword">type</span> Sign <span class="hljs-keyword">struct</span> {
+	d          <span class="hljs-keyword">int</span>
+	a, b       <span class="hljs-keyword">int</span>
+	m, n       <span class="hljs-keyword">int</span>
+	mLen, nLen <span class="hljs-keyword">int</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> numSigns <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;numSigns)
+	signs := <span class="hljs-built_in">make</span>([]Sign, numSigns)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; numSigns; i++ {
+		<span class="hljs-keyword">var</span> d, a, b <span class="hljs-keyword">int</span>
+		mustReadLineOfInts(&amp;d, &amp;a, &amp;b)
+		m := d + a
+		n := d - b
+		signs[i] = Sign{d, a, b, m, n, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>}
+		<span class="hljs-comment">// debug(fmt.Sprintf("m=%v, n=%v", m, n))</span>
+	}
+	maxValidSetLen := <span class="hljs-number">0</span>
+	maxSetCount := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(signs); i++ {
+		sign := &amp;signs[i]
+		m, n := sign.m, sign.n
+		mLen := <span class="hljs-number">0</span>
+		nLen := <span class="hljs-number">0</span>
+		mBreak := <span class="hljs-literal">false</span>
+		nBreak := <span class="hljs-literal">false</span>
+		<span class="hljs-keyword">for</span> j := i; j &lt; <span class="hljs-built_in">len</span>(signs); j++ {
+			<span class="hljs-keyword">if</span> signs[j].m == m &amp;&amp; !mBreak {
+				mLen++
+			}
+			<span class="hljs-keyword">if</span> signs[j].n == n &amp;&amp; !nBreak {
+				nLen++
+			}
+			<span class="hljs-keyword">if</span> signs[j].m != m {
+				mBreak = <span class="hljs-literal">true</span>
+			}
+			<span class="hljs-keyword">if</span> signs[j].n != n {
+				nBreak = <span class="hljs-literal">true</span>
+			}
+			<span class="hljs-keyword">if</span> mBreak &amp;&amp; nBreak {
+				<span class="hljs-keyword">break</span>
+			}
+		}
+		sign.mLen = mLen
+		sign.nLen = nLen
+	}
+	<span class="hljs-keyword">for</span> i, sign := <span class="hljs-keyword">range</span> signs {
+		setSize := <span class="hljs-number">0</span>
+		<span class="hljs-keyword">if</span> sign.mLen &gt; sign.nLen {
+			<span class="hljs-keyword">if</span> i+sign.mLen == <span class="hljs-built_in">len</span>(signs) {
+				setSize = sign.mLen
+			} <span class="hljs-keyword">else</span> {
+				setSize = sign.mLen + signs[i+sign.mLen].nLen
+			}
+		} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> sign.mLen &lt; sign.nLen {
+			<span class="hljs-keyword">if</span> i+sign.nLen == <span class="hljs-built_in">len</span>(signs) {
+				setSize = sign.nLen
+			} <span class="hljs-keyword">else</span> {
+				setSize = sign.nLen + signs[i+sign.nLen].mLen
+			}
+		} <span class="hljs-keyword">else</span> {
+			<span class="hljs-keyword">if</span> i+sign.mLen == <span class="hljs-built_in">len</span>(signs) {
+				setSize = sign.mLen
+			} <span class="hljs-keyword">else</span> {
+				nextSign := signs[i+sign.mLen]
+				setSize = sign.mLen + max(nextSign.mLen, nextSign.nLen)
+			}
+		}
+		<span class="hljs-keyword">if</span> maxValidSetLen &lt; setSize {
+			maxValidSetLen = setSize
+			maxSetCount = <span class="hljs-number">1</span>
+		} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> maxValidSetLen == setSize {
+			maxSetCount++
+		}
+	}
+	fmt.Fprintf(stdout, <span class="hljs-string">"%d %d\n"</span>, maxValidSetLen, maxSetCount)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">max</span><span class="hljs-params">(a, b <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">if</span> a &lt; b {
+		<span class="hljs-keyword">return</span> b
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> a
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h3>wrong-2</h3><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/wrong-2/why.diff" target="_blank">wrong-2/why.diff</a>:</div><a class="download" href="files/wrong-2/why.diff" title="Download original" download="why.diff">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/2/wrong-2/why.diff" target="_blank">open on GitHub</a></div><pre><code class="hljs diff"><span class="hljs-comment">--- wrong-2/cmd.go	2019-04-29 19:52:34.056966100 +0800</span>
+<span class="hljs-comment">+++ wrong-3/cmd.go	2019-04-29 19:52:34.057947600 +0800</span>
+<span class="hljs-meta">@@ -92,25 +92,15 @@</span>
+ 			}
+ 			return sLen
+ 		}
+<span class="hljs-deletion">-		if startSign.mLen &gt; startSign.nLen {</span>
+<span class="hljs-deletion">-			m = startSign.m</span>
+<span class="hljs-deletion">-			mSet = true</span>
+<span class="hljs-deletion">-			setSize = continueWith(true)</span>
+<span class="hljs-deletion">-		} else if startSign.mLen &lt; startSign.nLen {</span>
+<span class="hljs-deletion">-			n = startSign.n</span>
+<span class="hljs-deletion">-			nSet = true</span>
+<span class="hljs-deletion">-			setSize = continueWith(false)</span>
+<span class="hljs-deletion">-		} else {</span>
+<span class="hljs-deletion">-			m = startSign.m</span>
+<span class="hljs-deletion">-			mSet = true</span>
+<span class="hljs-deletion">-			nSet = false</span>
+<span class="hljs-deletion">-			a := continueWith(true)</span>
+<span class="hljs-deletion">-			n = startSign.n</span>
+<span class="hljs-deletion">-			nSet = true</span>
+<span class="hljs-deletion">-			mSet = false</span>
+<span class="hljs-deletion">-			b := continueWith(false)</span>
+<span class="hljs-deletion">-			setSize = max(a, b)</span>
+<span class="hljs-deletion">-		}</span>
+<span class="hljs-addition">+		m = startSign.m</span>
+<span class="hljs-addition">+		mSet = true</span>
+<span class="hljs-addition">+		nSet = false</span>
+<span class="hljs-addition">+		a := continueWith(true)</span>
+<span class="hljs-addition">+		n = startSign.n</span>
+<span class="hljs-addition">+		nSet = true</span>
+<span class="hljs-addition">+		mSet = false</span>
+<span class="hljs-addition">+		b := continueWith(false)</span>
+<span class="hljs-addition">+		setSize = max(a, b)</span>
+ 		if maxValidSetLen &lt; setSize {
+ 			maxValidSetLen = setSize
+ 			maxSetCount = 1
+</code></pre><h3>wrong-3</h3><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/wrong-3/why.diff" target="_blank">wrong-3/why.diff</a>:</div><a class="download" href="files/wrong-3/why.diff" title="Download original" download="why.diff">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/2/wrong-3/why.diff" target="_blank">open on GitHub</a></div><pre><code class="hljs diff"><span class="hljs-comment">--- wrong-3/cmd.go	2019-04-29 19:52:34.057947600 +0800</span>
+<span class="hljs-comment">+++ small/cmd.go	2019-05-02 16:14:44.682000000 +0800</span>
+<span class="hljs-meta">@@ -78,6 +78,7 @@</span>
+ 						break
+ 					} else if !mSet {
+ 						m = s.m
+<span class="hljs-addition">+						mSet = true</span>
+ 					}
+ 					sLen += s.mLen
+ 				} else {
+<span class="hljs-meta">@@ -85,6 +86,7 @@</span>
+ 						break
+ 					} else if !nSet {
+ 						n = s.n
+<span class="hljs-addition">+						nSet = true</span>
+ 					}
+ 					sLen += s.nLen
+ 				}
+</code></pre><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/problem.in" target="_blank">problem.in</a>:</div><a class="download" href="files/problem.in" title="Download original" download="problem.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/2/problem.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">1
+6
+1 6 0
+2 5 1
+3 5 1
+4 4 2
+5 2 2
+6 1 3
+</code></pre><h2>Solution that only works for the small input</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/small/cmd.go" target="_blank">small/cmd.go</a>:</div><a class="download" href="files/small/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/2/small/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-keyword">type</span> Sign <span class="hljs-keyword">struct</span> {
+	d          <span class="hljs-keyword">int</span>
+	a, b       <span class="hljs-keyword">int</span>
+	m, n       <span class="hljs-keyword">int</span>
+	mLen, nLen <span class="hljs-keyword">int</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> numSigns <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;numSigns)
+	signs := <span class="hljs-built_in">make</span>([]Sign, numSigns)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; numSigns; i++ {
+		<span class="hljs-keyword">var</span> d, a, b <span class="hljs-keyword">int</span>
+		mustReadLineOfInts(&amp;d, &amp;a, &amp;b)
+		m := d + a
+		n := d - b
+		signs[i] = Sign{d, a, b, m, n, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>}
+		<span class="hljs-comment">// debug(fmt.Sprintf("m=%v, n=%v", m, n))</span>
+	}
+	maxValidSetLen := <span class="hljs-number">0</span>
+	maxSetCount := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(signs); i++ {
+		sign := &amp;signs[i]
+		m, n := sign.m, sign.n
+		mLen := <span class="hljs-number">0</span>
+		nLen := <span class="hljs-number">0</span>
+		mBreak := <span class="hljs-literal">false</span>
+		nBreak := <span class="hljs-literal">false</span>
+		<span class="hljs-keyword">for</span> j := i; j &lt; <span class="hljs-built_in">len</span>(signs); j++ {
+			<span class="hljs-keyword">if</span> signs[j].m == m &amp;&amp; !mBreak {
+				mLen++
+			}
+			<span class="hljs-keyword">if</span> signs[j].n == n &amp;&amp; !nBreak {
+				nLen++
+			}
+			<span class="hljs-keyword">if</span> signs[j].m != m {
+				mBreak = <span class="hljs-literal">true</span>
+			}
+			<span class="hljs-keyword">if</span> signs[j].n != n {
+				nBreak = <span class="hljs-literal">true</span>
+			}
+			<span class="hljs-keyword">if</span> mBreak &amp;&amp; nBreak {
+				<span class="hljs-keyword">break</span>
+			}
+		}
+		sign.mLen = mLen
+		sign.nLen = nLen
+	}
+	<span class="hljs-keyword">for</span> i, startSign := <span class="hljs-keyword">range</span> signs {
+		<span class="hljs-keyword">var</span> setSize, m, n <span class="hljs-keyword">int</span>
+		<span class="hljs-keyword">var</span> mSet, nSet <span class="hljs-keyword">bool</span>
+		continueWith := <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(checkM <span class="hljs-keyword">bool</span>)</span> <span class="hljs-title">int</span></span> {
+			sLen := <span class="hljs-number">0</span>
+			<span class="hljs-keyword">for</span> i+sLen &lt; <span class="hljs-built_in">len</span>(signs) {
+				s := signs[i+sLen]
+				<span class="hljs-keyword">if</span> checkM {
+					<span class="hljs-keyword">if</span> mSet &amp;&amp; s.m != m {
+						<span class="hljs-keyword">break</span>
+					} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> !mSet {
+						m = s.m
+						mSet = <span class="hljs-literal">true</span>
+					}
+					sLen += s.mLen
+				} <span class="hljs-keyword">else</span> {
+					<span class="hljs-keyword">if</span> nSet &amp;&amp; s.n != n {
+						<span class="hljs-keyword">break</span>
+					} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> !nSet {
+						n = s.n
+						nSet = <span class="hljs-literal">true</span>
+					}
+					sLen += s.nLen
+				}
+				checkM = !checkM
+			}
+			<span class="hljs-keyword">return</span> sLen
+		}
+		m = startSign.m
+		mSet = <span class="hljs-literal">true</span>
+		nSet = <span class="hljs-literal">false</span>
+		a := continueWith(<span class="hljs-literal">true</span>)
+		n = startSign.n
+		nSet = <span class="hljs-literal">true</span>
+		mSet = <span class="hljs-literal">false</span>
+		b := continueWith(<span class="hljs-literal">false</span>)
+		setSize = max(a, b)
+		<span class="hljs-keyword">if</span> maxValidSetLen &lt; setSize {
+			maxValidSetLen = setSize
+			maxSetCount = <span class="hljs-number">1</span>
+		} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> maxValidSetLen == setSize {
+			maxSetCount++
+		}
+	}
+	fmt.Fprintf(stdout, <span class="hljs-string">"%d %d\n"</span>, maxValidSetLen, maxSetCount)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">max</span><span class="hljs-params">(a, b <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">int</span></span> {
+	<span class="hljs-keyword">if</span> a &lt; b {
+		<span class="hljs-keyword">return</span> b
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> a
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/2/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">3
+1
+1 1 1
+5
+2 7 12
+6 3 11
+8 10 1
+11 11 12
+13 9 14
+5
+1 3 3
+2 2 2
+3 1 1
+4 2 2
+5 3 3</code></pre><h2>Other files</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/problem.out" target="_blank">problem.out</a>:</div><a class="download" href="files/problem.out" title="Download original" download="problem.out">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/2/problem.out" target="_blank">open on GitHub</a></div><pre><code class="hljs">Case #1: 6 1
+</code></pre></body></html>

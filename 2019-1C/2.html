@@ -1,0 +1,96 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2019-1C Problem B - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2019-1C Problem B</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1C/2/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> t, F <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;t, &amp;F)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; t; i++ {
+		test(F)
+	}
+}
+
+<span class="hljs-keyword">const</span> A = <span class="hljs-keyword">byte</span>(<span class="hljs-string">'A'</span>)
+
+<span class="hljs-keyword">type</span> Pib <span class="hljs-keyword">struct</span> {
+	id  <span class="hljs-keyword">int</span>
+	arr []<span class="hljs-keyword">byte</span>
+}
+
+<span class="hljs-keyword">var</span> fact [<span class="hljs-number">6</span>]<span class="hljs-keyword">int</span> = [<span class="hljs-number">6</span>]<span class="hljs-keyword">int</span>{<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">6</span>, <span class="hljs-number">24</span>, <span class="hljs-number">120</span>}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">(F <span class="hljs-keyword">int</span>)</span></span> {
+	query := <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(pos <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">byte</span></span> {
+		fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, pos+<span class="hljs-number">1</span>)
+		stdout.Flush()
+		ret := mustReadLine()[<span class="hljs-number">0</span>]
+		<span class="hljs-keyword">if</span> ret == <span class="hljs-string">'N'</span> {
+			os.Exit(<span class="hljs-number">0</span>)
+		}
+		<span class="hljs-keyword">return</span> ret - A
+	}
+	leftToQuery := <span class="hljs-built_in">make</span>([]Pib, <span class="hljs-number">119</span>)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(leftToQuery); i++ {
+		leftToQuery[i].id = i
+		leftToQuery[i].arr = <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">byte</span>, <span class="hljs-number">5</span>)
+	}
+	<span class="hljs-keyword">for</span> prefixKnown := <span class="hljs-number">0</span>; prefixKnown &lt; <span class="hljs-number">3</span>; prefixKnown++ {
+		<span class="hljs-comment">// debug(fmt.Sprintf("%v %v", prefixKnown, leftToQuery))</span>
+		counts := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">5</span>)
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(leftToQuery); i++ {
+			lt := &amp;leftToQuery[i]
+			res := query(lt.id*<span class="hljs-number">5</span> + prefixKnown)
+			counts[res]++
+			lt.arr[prefixKnown] = res
+		}
+		letterIs := <span class="hljs-keyword">byte</span>(<span class="hljs-number">0</span>)
+		expectedCount := <span class="hljs-number">120</span>
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt;= prefixKnown; i++ {
+			expectedCount /= (<span class="hljs-number">5</span> - i)
+		}
+		<span class="hljs-keyword">for</span> i, cnt := <span class="hljs-keyword">range</span> counts {
+			<span class="hljs-keyword">if</span> cnt == expectedCount<span class="hljs-number">-1</span> {
+				letterIs = <span class="hljs-keyword">byte</span>(i)
+				<span class="hljs-keyword">break</span>
+			} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> cnt != expectedCount {
+				assert(cnt == <span class="hljs-number">0</span>)
+			}
+		}
+		newLeftToQuery := <span class="hljs-built_in">make</span>([]Pib, <span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(leftToQuery))
+		<span class="hljs-keyword">for</span> _, lt := <span class="hljs-keyword">range</span> leftToQuery {
+			<span class="hljs-keyword">if</span> lt.arr[prefixKnown] == letterIs {
+				newLeftToQuery = <span class="hljs-built_in">append</span>(newLeftToQuery, lt)
+			}
+		}
+		assert(<span class="hljs-built_in">len</span>(newLeftToQuery) == expectedCount<span class="hljs-number">-1</span>)
+		leftToQuery = newLeftToQuery
+	}
+	assert(<span class="hljs-built_in">len</span>(leftToQuery) == <span class="hljs-number">1</span>)
+	<span class="hljs-comment">// find out last 2 letter with 1 query</span>
+	rsp := query(leftToQuery[<span class="hljs-number">0</span>].id*<span class="hljs-number">5</span> + <span class="hljs-number">3</span>)
+	leftToQuery[<span class="hljs-number">0</span>].arr[<span class="hljs-number">4</span>] = rsp <span class="hljs-comment">// arr[3] is not rsp</span>
+	missing := leftToQuery[<span class="hljs-number">0</span>].arr
+	<span class="hljs-comment">// last 1 letter</span>
+	letterMissing := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-keyword">byte</span>]<span class="hljs-keyword">bool</span>)
+	<span class="hljs-keyword">for</span> b := <span class="hljs-keyword">byte</span>(<span class="hljs-number">0</span>); b &lt; <span class="hljs-number">5</span>; b++ {
+		letterMissing[b] = <span class="hljs-literal">true</span>
+	}
+	<span class="hljs-keyword">for</span> _, l := <span class="hljs-keyword">range</span> missing[<span class="hljs-number">0</span>:<span class="hljs-number">3</span>] {
+		<span class="hljs-built_in">delete</span>(letterMissing, l)
+	}
+	<span class="hljs-built_in">delete</span>(letterMissing, missing[<span class="hljs-number">4</span>])
+	<span class="hljs-keyword">var</span> msLetter <span class="hljs-keyword">byte</span>
+	<span class="hljs-keyword">for</span> l, _ := <span class="hljs-keyword">range</span> letterMissing {
+		msLetter = l
+		<span class="hljs-keyword">break</span>
+	}
+	missing[<span class="hljs-number">3</span>] = msLetter
+	<span class="hljs-keyword">for</span> _, b := <span class="hljs-keyword">range</span> missing {
+		stdout.WriteByte(b + A)
+	}
+	stdout.WriteByte(<span class="hljs-string">'\n'</span>)
+	stdout.Flush()
+	<span class="hljs-keyword">if</span> mustReadLine() != <span class="hljs-string">"Y"</span> {
+		os.Exit(<span class="hljs-number">0</span>)
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre></body></html>

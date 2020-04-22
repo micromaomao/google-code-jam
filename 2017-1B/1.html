@@ -1,0 +1,31 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2017-1B Problem A - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2017-1B Problem A</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1B/1/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> D, N <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;D, &amp;N)
+	<span class="hljs-keyword">var</span> maxSpeed <span class="hljs-keyword">float64</span> = <span class="hljs-number">-1</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i++ {
+		<span class="hljs-keyword">var</span> K, S <span class="hljs-keyword">int</span>
+		mustReadLineOfInts(&amp;K, &amp;S)
+		t := (<span class="hljs-keyword">float64</span>(D) - <span class="hljs-keyword">float64</span>(K)) / <span class="hljs-keyword">float64</span>(S)
+		speed := <span class="hljs-keyword">float64</span>(D) / t
+		<span class="hljs-keyword">if</span> maxSpeed == <span class="hljs-number">-1</span> || maxSpeed &gt; speed {
+			maxSpeed = speed
+		}
+	}
+	fmt.Fprintf(stdout, <span class="hljs-string">"%.12f\n"</span>, maxSpeed)
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2017-1B/1/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">3
+2525 1
+2400 5
+300 2
+120 60
+60 90
+100 2
+80 100
+70 10</code></pre></body></html>

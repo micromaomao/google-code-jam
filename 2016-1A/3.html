@@ -1,0 +1,256 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2016-1A Problem C - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2016-1A Problem C</h1><h2>Final solutions</h2><h3>Solution 1</h3><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/solution-1/cmd.go" target="_blank">solution-1/cmd.go</a>:</div><a class="download" href="files/solution-1/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1A/3/solution-1/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-keyword">type</span> Node <span class="hljs-keyword">struct</span> {
+	childId   <span class="hljs-keyword">int</span>
+	bff       *Node
+	isBffOf   []*Node
+	distance  <span class="hljs-keyword">int</span>
+	component *Component
+	isInCycle <span class="hljs-keyword">bool</span>
+}
+
+<span class="hljs-keyword">type</span> Component <span class="hljs-keyword">struct</span> {
+	entry      *Node
+	cycleSize  <span class="hljs-keyword">int</span>
+	isPartOf   *Component
+	cycleEntry *Node
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	stdout.Flush()
+	os.Stderr.Write([]<span class="hljs-keyword">byte</span>{<span class="hljs-string">'\n'</span>})
+	<span class="hljs-keyword">var</span> N <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;N)
+	bffs := mustReadLineOfIntsIntoArray()
+	assert(<span class="hljs-built_in">len</span>(bffs) == N)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i++ {
+		bffs[i]--
+		assert(bffs[i] &gt;= <span class="hljs-number">0</span> &amp;&amp; bffs[i] &lt; N &amp;&amp; bffs[i] != i)
+	}
+	childsLeft := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-keyword">int</span>]<span class="hljs-keyword">bool</span>)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i++ {
+		childsLeft[i] = <span class="hljs-literal">true</span>
+	}
+	childNodes := <span class="hljs-built_in">make</span>([]*Node, N)
+	components := <span class="hljs-built_in">make</span>([]Component, <span class="hljs-number">0</span>)
+	<span class="hljs-keyword">for</span> <span class="hljs-built_in">len</span>(childsLeft) &gt; <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">var</span> childId <span class="hljs-keyword">int</span>
+		<span class="hljs-keyword">for</span> childId, _ = <span class="hljs-keyword">range</span> childsLeft {
+			<span class="hljs-keyword">break</span>
+		}
+		components = <span class="hljs-built_in">append</span>(components, Component{})
+		cp := &amp;components[<span class="hljs-built_in">len</span>(components)<span class="hljs-number">-1</span>]
+		entry := buildChild(cp, bffs, childNodes, childsLeft, childId, <span class="hljs-number">0</span>)
+		cp.entry = entry
+		<span class="hljs-keyword">if</span> cp.isPartOf == <span class="hljs-literal">nil</span> {
+			debug(fmt.Sprintf(<span class="hljs-string">"Component with child %d has cycle size %d starting %v"</span>, cp.entry.childId+<span class="hljs-number">1</span>, cp.cycleSize, cp.cycleEntry.childId+<span class="hljs-number">1</span>))
+		}
+	}
+	maxCycleSize := <span class="hljs-number">0</span>
+	twoCyclesSzie := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> _, c := <span class="hljs-keyword">range</span> components {
+		<span class="hljs-keyword">if</span> c.isPartOf != <span class="hljs-literal">nil</span> {
+			<span class="hljs-keyword">continue</span>
+		}
+		<span class="hljs-keyword">if</span> c.cycleSize &gt; <span class="hljs-number">2</span> {
+			<span class="hljs-keyword">if</span> maxCycleSize &lt; c.cycleSize {
+				maxCycleSize = c.cycleSize
+			}
+		} <span class="hljs-keyword">else</span> {
+			assert(c.cycleSize == <span class="hljs-number">2</span>)
+			entry := c.cycleEntry
+			assert(c.cycleEntry != <span class="hljs-literal">nil</span>)
+			current := entry
+			ct := <span class="hljs-number">0</span>
+			<span class="hljs-keyword">for</span> {
+				ct++
+				current.isInCycle = <span class="hljs-literal">true</span>
+				current = current.bff
+				<span class="hljs-keyword">if</span> current == entry {
+					<span class="hljs-keyword">break</span>
+				}
+			}
+			assert(ct == <span class="hljs-number">2</span>)
+			ct = <span class="hljs-number">0</span>
+			tl := <span class="hljs-number">0</span>
+			<span class="hljs-keyword">for</span> {
+				ct++
+				tl += tailSize(current)
+				current = current.bff
+				<span class="hljs-keyword">if</span> current == entry {
+					<span class="hljs-keyword">break</span>
+				}
+			}
+			assert(ct == <span class="hljs-number">2</span>)
+			ct = <span class="hljs-number">0</span>
+			cSize := <span class="hljs-number">2</span> + tl
+			twoCyclesSzie += cSize
+		}
+	}
+	maxCSize := maxCycleSize
+	<span class="hljs-keyword">if</span> twoCyclesSzie &gt; maxCSize {
+		maxCSize = twoCyclesSzie
+	}
+	fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, maxCSize)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">buildChild</span><span class="hljs-params">(component *Component, bffs []<span class="hljs-keyword">int</span>, childNodes []*Node, childsLeft <span class="hljs-keyword">map</span>[<span class="hljs-keyword">int</span>]<span class="hljs-keyword">bool</span>, childId <span class="hljs-keyword">int</span>, distance <span class="hljs-keyword">int</span>)</span> *<span class="hljs-title">Node</span></span> {
+	<span class="hljs-keyword">if</span> childNodes[childId] != <span class="hljs-literal">nil</span> {
+		_, exist := childsLeft[childId]
+		assert(!exist)
+		cn := childNodes[childId]
+		<span class="hljs-keyword">if</span> cn.component == component {
+			assert(component.cycleSize == <span class="hljs-number">0</span>)
+			component.cycleSize = distance - cn.distance
+			component.cycleEntry = cn
+			<span class="hljs-keyword">return</span> cn
+		} <span class="hljs-keyword">else</span> {
+			component.isPartOf = cn.component
+			<span class="hljs-comment">// We are not in a cycle</span>
+			<span class="hljs-keyword">return</span> cn
+		}
+	}
+	_, exist := childsLeft[childId]
+	assert(exist)
+	<span class="hljs-built_in">delete</span>(childsLeft, childId)
+	childNodes[childId] = &amp;Node{
+		childId:   childId,
+		bff:       <span class="hljs-literal">nil</span>,
+		isBffOf:   <span class="hljs-built_in">make</span>([]*Node, <span class="hljs-number">0</span>),
+		distance:  distance,
+		component: component,
+		isInCycle: <span class="hljs-literal">false</span>,
+	}
+	bff := buildChild(component, bffs, childNodes, childsLeft, bffs[childId], distance+<span class="hljs-number">1</span>)
+	childNodes[childId].bff = bff
+	bff.isBffOf = <span class="hljs-built_in">append</span>(bff.isBffOf, childNodes[childId])
+	<span class="hljs-keyword">if</span> bff.component != component {
+		childNodes[childId].component = bff.component
+		assert(bff.component == component.isPartOf)
+	}
+	<span class="hljs-keyword">return</span> childNodes[childId]
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">tailSize</span><span class="hljs-params">(node *Node)</span> <span class="hljs-title">int</span></span> {
+	maxTailSize := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> _, t := <span class="hljs-keyword">range</span> node.isBffOf {
+		assert(t.component == node.component)
+		<span class="hljs-keyword">if</span> t.isInCycle {
+			<span class="hljs-keyword">continue</span>
+		}
+		ts := tailSize(t) + <span class="hljs-number">1</span>
+		<span class="hljs-keyword">if</span> maxTailSize &lt; ts {
+			maxTailSize = ts
+		}
+	}
+	<span class="hljs-keyword">return</span> maxTailSize
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h3>Solution 2</h3><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/solution-2/cmd.go" target="_blank">solution-2/cmd.go</a>:</div><a class="download" href="files/solution-2/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1A/3/solution-2/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> N <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;N)
+	bff := mustReadLineOfIntsIntoArray()
+	assert(<span class="hljs-built_in">len</span>(bff) == N)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i++ {
+		bff[i]--
+	}
+
+	largestCycleSize := <span class="hljs-number">0</span>
+	isTwoSizedCycles := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">bool</span>, N)
+	tailLengths := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, N)
+	visited := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">bool</span>, N)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i++ {
+		<span class="hljs-keyword">if</span> visited[i] {
+			<span class="hljs-keyword">continue</span>
+		}
+		visited[i] = <span class="hljs-literal">true</span>
+		<span class="hljs-comment">// start dfs on each vertex</span>
+		cur := i
+		iter := <span class="hljs-number">0</span>
+		<span class="hljs-built_in">len</span> := <span class="hljs-number">0</span>
+		newVisited := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">bool</span>, N)
+		<span class="hljs-keyword">for</span> {
+			<span class="hljs-keyword">if</span> bff[bff[cur]] == cur {
+				isTwoSizedCycles[cur] = <span class="hljs-literal">true</span>
+				isTwoSizedCycles[bff[cur]] = <span class="hljs-literal">true</span>
+				<span class="hljs-keyword">if</span> tailLengths[cur] &lt; <span class="hljs-built_in">len</span> {
+					tailLengths[cur] = <span class="hljs-built_in">len</span>
+				}
+				<span class="hljs-keyword">break</span>
+			}
+			<span class="hljs-built_in">len</span>++
+			iter++
+			cur = bff[cur]
+			<span class="hljs-keyword">if</span> cur == i {
+				<span class="hljs-keyword">break</span>
+			}
+			newVisited[cur] = <span class="hljs-literal">true</span>
+			<span class="hljs-keyword">if</span> iter &gt; N+<span class="hljs-number">1</span> {
+				<span class="hljs-built_in">len</span> = <span class="hljs-number">0</span>
+				<span class="hljs-keyword">break</span>
+			}
+		}
+		<span class="hljs-keyword">if</span> largestCycleSize &lt; <span class="hljs-built_in">len</span> {
+			largestCycleSize = <span class="hljs-built_in">len</span>
+		}
+		<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span> &gt; <span class="hljs-number">0</span> {
+			<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i++ {
+				<span class="hljs-keyword">if</span> newVisited[i] {
+					visited[i] = <span class="hljs-literal">true</span>
+				}
+			}
+		}
+	}
+
+	twoSizedCycleCircleSize := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i++ {
+		<span class="hljs-keyword">if</span> isTwoSizedCycles[i] {
+			twoSizedCycleCircleSize += tailLengths[i] + <span class="hljs-number">1</span>
+		}
+	}
+
+	<span class="hljs-keyword">if</span> twoSizedCycleCircleSize &gt; largestCycleSize {
+		fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, twoSizedCycleCircleSize)
+	} <span class="hljs-keyword">else</span> {
+		fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, largestCycleSize)
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1A/3/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">4
+4
+2 3 4 1
+4
+3 3 4 1
+4
+3 3 4 3
+10
+7 8 10 10 9 2 9 6 3 3
+</code></pre><h2>Other files</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/note.md" target="_blank">note.md</a>:</div><a class="download" href="files/note.md" title="Download original" download="note.md">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1A/3/note.md" target="_blank">open on GitHub</a></div><div><p>The reason why <code>4 3 2 1</code> results in all 4 of the children in the circle is because any number of 2-sized cycles can
+be put together in the circle. Consider the solution <code>1 4 2 3</code>.</p>
+</div><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sketch.in" target="_blank">sketch.in</a>:</div><a class="download" href="files/sketch.in" title="Download original" download="sketch.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1A/3/sketch.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">5
+6
+6 5 2 2 6 3
+4
+4 3 2 1
+3
+2 1 1
+6
+2 1 1 2 4 4
+4
+4 1 2 3
+</code></pre><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sketch.out" target="_blank">sketch.out</a>:</div><a class="download" href="files/sketch.out" title="Download original" download="sketch.out">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1A/3/sketch.out" target="_blank">open on GitHub</a></div><pre><code class="hljs">Case #1: 4
+Case #2: 4
+Case #3: 3
+Case #4: 5
+Case #5: 4
+</code></pre></body></html>

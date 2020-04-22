@@ -1,0 +1,69 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2019-1A Problem B - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2019-1A Problem B</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/cmd.go" target="_blank">cmd.go</a>:</div><a class="download" href="files/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2019-1A/2/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> t, maxNights, maxGophers <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;t, &amp;maxNights, &amp;maxGophers)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; t; i++ {
+		test(maxNights, maxGophers)
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">(maxNights, maxGophers <span class="hljs-keyword">int</span>)</span></span> {
+	validGopherAmounts := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">0</span>, maxGophers)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">1</span>; i &lt;= maxGophers; i++ {
+		validGopherAmounts = <span class="hljs-built_in">append</span>(validGopherAmounts, i)
+	}
+	queriesRem := maxNights
+	mod := <span class="hljs-number">18</span>
+	<span class="hljs-keyword">for</span> {
+		<span class="hljs-keyword">if</span> queriesRem == <span class="hljs-number">0</span> {
+			os.Exit(<span class="hljs-number">0</span>)
+		}
+		queriesRem--
+		modStr := strconv.Itoa(mod)
+		<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">18</span>; i++ {
+			stdout.WriteString(modStr)
+			<span class="hljs-keyword">if</span> i &lt; <span class="hljs-number">17</span> {
+				stdout.WriteByte(<span class="hljs-string">' '</span>)
+			}
+		}
+		stdout.WriteByte(<span class="hljs-string">'\n'</span>)
+		stdout.Flush()
+		windmails := mustReadLineOfIntsIntoArray()
+		<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(windmails) == <span class="hljs-number">1</span> {
+			os.Exit(<span class="hljs-number">0</span>)
+		}
+		assert(<span class="hljs-built_in">len</span>(windmails) == <span class="hljs-number">18</span>)
+		sum := <span class="hljs-number">0</span>
+		<span class="hljs-keyword">for</span> _, w := <span class="hljs-keyword">range</span> windmails {
+			sum += w
+		}
+		newValidGopherAmounts := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(validGopherAmounts))
+		<span class="hljs-keyword">for</span> _, gophers := <span class="hljs-keyword">range</span> validGopherAmounts {
+			<span class="hljs-keyword">if</span> gophers%mod == sum%mod {
+				newValidGopherAmounts = <span class="hljs-built_in">append</span>(newValidGopherAmounts, gophers)
+			}
+		}
+		validGopherAmounts = newValidGopherAmounts
+		<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(validGopherAmounts) == <span class="hljs-number">1</span> {
+			stdout.WriteString(strconv.Itoa(validGopherAmounts[<span class="hljs-number">0</span>]))
+			stdout.WriteByte(<span class="hljs-string">'\n'</span>)
+			stdout.Flush()
+			<span class="hljs-keyword">var</span> verdict <span class="hljs-keyword">int</span>
+			mustReadLineOfInts(&amp;verdict)
+			<span class="hljs-keyword">if</span> verdict == <span class="hljs-number">-1</span> {
+				os.Exit(<span class="hljs-number">0</span>)
+			}
+			<span class="hljs-keyword">return</span>
+		} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(validGopherAmounts) == <span class="hljs-number">0</span> {
+			os.Exit(<span class="hljs-number">0</span>)
+		}
+		<span class="hljs-keyword">if</span> mod == <span class="hljs-number">2</span> {
+			mod = <span class="hljs-number">18</span>
+		} <span class="hljs-keyword">else</span> {
+			mod--
+		}
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre></body></html>

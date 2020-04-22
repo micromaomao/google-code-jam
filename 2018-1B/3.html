@@ -1,0 +1,394 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2018-1B Problem C - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2018-1B Problem C</h1><h2>Wrong solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/wrong/cmd.go" target="_blank">wrong/cmd.go</a>:</div><a class="download" href="files/wrong/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/3/wrong/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// Works for: Test set 1 and 2</span>
+
+<span class="hljs-comment">// This approach use binary search, answering the question "can we make n lead"?</span>
+<span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-keyword">type</span> Metal <span class="hljs-keyword">struct</span> {
+	ing1, ing2 <span class="hljs-keyword">int</span>
+	hasAmount  <span class="hljs-keyword">uint</span>
+}
+
+<span class="hljs-keyword">var</span> metals []Metal
+<span class="hljs-keyword">var</span> totalSupply <span class="hljs-keyword">uint</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> M <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;M)
+	metals = <span class="hljs-built_in">make</span>([]Metal, M)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; M; i++ {
+		<span class="hljs-keyword">var</span> ing1, ing2 <span class="hljs-keyword">int</span>
+		mustReadLineOfInts(&amp;ing1, &amp;ing2)
+		metals[i].ing1 = ing1 - <span class="hljs-number">1</span>
+		metals[i].ing2 = ing2 - <span class="hljs-number">1</span>
+	}
+	line := strings.Split(mustReadLine(), <span class="hljs-string">" "</span>)
+	assert(<span class="hljs-built_in">len</span>(line) == M)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; M; i++ {
+		ps, err := strconv.ParseUint(line[i], <span class="hljs-number">10</span>, <span class="hljs-number">32</span>)
+		<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+			<span class="hljs-built_in">panic</span>(err)
+		}
+		metals[i].hasAmount = <span class="hljs-keyword">uint</span>(ps)
+		totalSupply += metals[i].hasAmount
+	}
+
+	<span class="hljs-keyword">var</span> l, r <span class="hljs-keyword">uint</span>
+	r = totalSupply + <span class="hljs-number">1</span>
+	<span class="hljs-keyword">for</span> r-l &gt; <span class="hljs-number">1</span> {
+		m := (l + r) / <span class="hljs-number">2</span>
+		<span class="hljs-keyword">if</span> check(m) {
+			l = m
+		} <span class="hljs-keyword">else</span> {
+			r = m
+		}
+	}
+	fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, l)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">check</span><span class="hljs-params">(m <span class="hljs-keyword">uint</span>)</span> <span class="hljs-title">bool</span></span> {
+	wants := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-keyword">int</span>]<span class="hljs-keyword">uint</span>)
+	wants[<span class="hljs-number">0</span>] = m
+	totalWanted := m
+	<span class="hljs-keyword">for</span> {
+		unsatisfied := <span class="hljs-number">-1</span>
+		<span class="hljs-keyword">for</span> want, amount := <span class="hljs-keyword">range</span> wants {
+			<span class="hljs-keyword">if</span> metals[want].hasAmount &lt; amount {
+				unsatisfied = want
+				<span class="hljs-keyword">break</span>
+			} <span class="hljs-keyword">else</span> {
+				metals[want].hasAmount -= amount
+				<span class="hljs-built_in">delete</span>(wants, want)
+			}
+		}
+		<span class="hljs-keyword">if</span> unsatisfied == <span class="hljs-number">-1</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+		}
+		additionalWantedAmount := wants[unsatisfied] - metals[unsatisfied].hasAmount
+		assert(additionalWantedAmount &gt; <span class="hljs-number">0</span>)
+		wants[unsatisfied] = wants[unsatisfied] - additionalWantedAmount
+		<span class="hljs-keyword">if</span> wants[unsatisfied] == <span class="hljs-number">0</span> {
+			<span class="hljs-built_in">delete</span>(wants, unsatisfied)
+		}
+		wants[metals[unsatisfied].ing1] += additionalWantedAmount
+		wants[metals[unsatisfied].ing2] += additionalWantedAmount
+		totalWanted += additionalWantedAmount
+		<span class="hljs-keyword">if</span> totalWanted &gt; totalSupply {
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+		}
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Solution that only works for the small input</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/small-1/cmd.go" target="_blank">small-1/cmd.go</a>:</div><a class="download" href="files/small-1/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/3/small-1/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// Works for: Test set 1</span>
+
+<span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-keyword">type</span> Metal <span class="hljs-keyword">struct</span> {
+	ing1, ing2 <span class="hljs-keyword">int</span>
+	hasAmount  <span class="hljs-keyword">uint</span>
+}
+
+<span class="hljs-keyword">var</span> metals []Metal
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> M <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;M)
+	metals = <span class="hljs-built_in">make</span>([]Metal, M)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; M; i++ {
+		<span class="hljs-keyword">var</span> ing1, ing2 <span class="hljs-keyword">int</span>
+		mustReadLineOfInts(&amp;ing1, &amp;ing2)
+		metals[i].ing1 = ing1 - <span class="hljs-number">1</span>
+		metals[i].ing2 = ing2 - <span class="hljs-number">1</span>
+	}
+	hasAmounts := mustReadLineOfIntsIntoArray()
+	assert(<span class="hljs-built_in">len</span>(hasAmounts) == M)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; M; i++ {
+		metals[i].hasAmount = <span class="hljs-keyword">uint</span>(hasAmounts[i])
+	}
+	collectedZeroMetals := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> {
+		has := takeMetal(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+		<span class="hljs-keyword">if</span> has {
+			collectedZeroMetals++
+		} <span class="hljs-keyword">else</span> {
+			<span class="hljs-keyword">break</span>
+		}
+	}
+	fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, collectedZeroMetals)
+}
+
+<span class="hljs-keyword">type</span> ExclusionList <span class="hljs-keyword">map</span>[<span class="hljs-keyword">int</span>]<span class="hljs-keyword">bool</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">takeMetal</span><span class="hljs-params">(metal <span class="hljs-keyword">int</span>, depth <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+	target := &amp;metals[metal]
+	<span class="hljs-keyword">if</span> target.hasAmount &gt; <span class="hljs-number">0</span> {
+		target.hasAmount--
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+	}
+	<span class="hljs-keyword">if</span> depth &gt; <span class="hljs-built_in">len</span>(metals) {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+	}
+	tookIg1 := takeMetal(target.ing1, depth+<span class="hljs-number">1</span>)
+	tookIg2 := takeMetal(target.ing2, depth+<span class="hljs-number">1</span>)
+	<span class="hljs-keyword">if</span> tookIg1 &amp;&amp; tookIg2 {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+	}
+	<span class="hljs-keyword">if</span> tookIg1 {
+		metals[target.ing1].hasAmount++
+	}
+	<span class="hljs-keyword">if</span> tookIg2 {
+		metals[target.ing2].hasAmount++
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/small-2/cmd.go" target="_blank">small-2/cmd.go</a>:</div><a class="download" href="files/small-2/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/3/small-2/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// Works for: Test set 1 and 2</span>
+
+<span class="hljs-comment">/*
+Referring to small-1...
+
+The first idea of improvement here is that, if we already have, let's say, 100 x and 100 y, and lead requires x and
+y, we can directly duduct 100 from each of the supply of x and y, and add 100 to leadCollected, rather than calling
+takeMetal 100 times.
+
+The second idea here is to "cache" the result of going through the deep calling stack of `takeMetal`. For example, if
+we had already found out that in order to get 1 we need 2 and 3, and in order to get 2 we need 4 and 5, next time we
+can just say in order to get 1 we need 3, 4, and 5, one of each.
+
+These two optimizations enables us to reduce needing to repeatly call takeMetal as much as possible...
+
+But really, a better way to do it is the method in the analysis - maintain a optimal "recipe". Therefore this file
+implements that approach.
+
+Disclaimer: the above ideas are produced only after reading the analysis, in an attempt to learn how I can go about
+improving an algorithm during a real contest.
+*/</span>
+
+<span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-keyword">type</span> Metal <span class="hljs-keyword">struct</span> {
+	ing1, ing2 <span class="hljs-keyword">int</span>
+	hasAmount  <span class="hljs-keyword">uint</span>
+}
+
+<span class="hljs-keyword">var</span> metals []Metal
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> M <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;M)
+	metals = <span class="hljs-built_in">make</span>([]Metal, M)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; M; i++ {
+		<span class="hljs-keyword">var</span> ing1, ing2 <span class="hljs-keyword">int</span>
+		mustReadLineOfInts(&amp;ing1, &amp;ing2)
+		metals[i].ing1 = ing1 - <span class="hljs-number">1</span>
+		metals[i].ing2 = ing2 - <span class="hljs-number">1</span>
+	}
+	line := strings.Split(mustReadLine(), <span class="hljs-string">" "</span>)
+	assert(<span class="hljs-built_in">len</span>(line) == M)
+	<span class="hljs-keyword">var</span> totalAmountHas <span class="hljs-keyword">uint</span> = <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; M; i++ {
+		ps, err := strconv.ParseUint(line[i], <span class="hljs-number">10</span>, <span class="hljs-number">32</span>)
+		<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+			<span class="hljs-built_in">panic</span>(err)
+		}
+		metals[i].hasAmount = <span class="hljs-keyword">uint</span>(ps)
+		totalAmountHas += metals[i].hasAmount
+	}
+	recipe := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-keyword">int</span>]<span class="hljs-keyword">uint</span>) <span class="hljs-comment">// recipe to make metal 0</span>
+	recipe[<span class="hljs-number">0</span>] = <span class="hljs-number">1</span>                <span class="hljs-comment">// requires 1 metal 0 to produce 1 metal 0 (initially)</span>
+	<span class="hljs-keyword">var</span> zeroMetalsProduced <span class="hljs-keyword">uint</span>
+a:
+	<span class="hljs-keyword">for</span> {
+		limitingMetals := <span class="hljs-built_in">make</span>([]<span class="hljs-keyword">int</span>, <span class="hljs-number">0</span>)
+		<span class="hljs-keyword">var</span> produceAmount <span class="hljs-keyword">uint</span> = (<span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">32</span>) - <span class="hljs-number">1</span>
+		<span class="hljs-keyword">var</span> totalNumRequired <span class="hljs-keyword">uint</span> = <span class="hljs-number">0</span>
+		<span class="hljs-keyword">for</span> metalRequired, amountRequired := <span class="hljs-keyword">range</span> recipe {
+			totalNumRequired += amountRequired
+			hasAmount := metals[metalRequired].hasAmount
+			<span class="hljs-keyword">if</span> hasAmount &lt; amountRequired {
+				limitingMetals = <span class="hljs-built_in">append</span>(limitingMetals, metalRequired)
+				produceAmount = <span class="hljs-number">0</span>
+			} <span class="hljs-keyword">else</span> {
+				canProduceAmount := hasAmount / amountRequired
+				<span class="hljs-keyword">if</span> canProduceAmount &lt; produceAmount {
+					produceAmount = canProduceAmount
+				}
+			}
+		}
+		<span class="hljs-keyword">if</span> totalNumRequired &gt; totalAmountHas {
+			<span class="hljs-keyword">break</span>
+		}
+		<span class="hljs-keyword">if</span> produceAmount == <span class="hljs-number">0</span> {
+			<span class="hljs-keyword">for</span> _, mtLacking := <span class="hljs-keyword">range</span> limitingMetals {
+				metalLacking := metals[mtLacking]
+				hasAmount := metalLacking.hasAmount
+				additionalRequiredAmount := recipe[mtLacking] - hasAmount
+				<span class="hljs-keyword">if</span> hasAmount == <span class="hljs-number">0</span> {
+					<span class="hljs-built_in">delete</span>(recipe, mtLacking)
+				} <span class="hljs-keyword">else</span> {
+					recipe[mtLacking] = hasAmount
+				}
+				<span class="hljs-keyword">if</span> metalLacking.ing1 == mtLacking {
+					<span class="hljs-keyword">break</span> a
+				} <span class="hljs-keyword">else</span> {
+					recipe[metalLacking.ing1] += additionalRequiredAmount
+				}
+				<span class="hljs-keyword">if</span> metalLacking.ing2 == mtLacking {
+					<span class="hljs-keyword">break</span> a
+				} <span class="hljs-keyword">else</span> {
+					recipe[metalLacking.ing2] += additionalRequiredAmount
+				}
+			}
+		} <span class="hljs-keyword">else</span> {
+			<span class="hljs-keyword">for</span> metalRequired, amountRequired := <span class="hljs-keyword">range</span> recipe {
+				deduction := amountRequired * produceAmount
+				assert(metals[metalRequired].hasAmount &gt;= deduction)
+				metals[metalRequired].hasAmount -= deduction
+				totalAmountHas -= deduction
+				assert(totalAmountHas &gt;= <span class="hljs-number">0</span>)
+			}
+			zeroMetalsProduced += produceAmount
+		}
+	}
+	fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, zeroMetalsProduced)
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/small-3/cmd.go" target="_blank">small-3/cmd.go</a>:</div><a class="download" href="files/small-3/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/3/small-3/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// Works for: Test set 1 and 2</span>
+
+<span class="hljs-comment">// This approach use binary search, answering the question "can we make n lead"?</span>
+<span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-keyword">type</span> Metal <span class="hljs-keyword">struct</span> {
+	ing1, ing2 <span class="hljs-keyword">int</span>
+	hasAmount  <span class="hljs-keyword">uint</span>
+}
+
+<span class="hljs-keyword">var</span> metals []Metal
+<span class="hljs-keyword">var</span> totalSupply <span class="hljs-keyword">uint</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> M <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;M)
+	metals = <span class="hljs-built_in">make</span>([]Metal, M)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; M; i++ {
+		<span class="hljs-keyword">var</span> ing1, ing2 <span class="hljs-keyword">int</span>
+		mustReadLineOfInts(&amp;ing1, &amp;ing2)
+		metals[i].ing1 = ing1 - <span class="hljs-number">1</span>
+		metals[i].ing2 = ing2 - <span class="hljs-number">1</span>
+	}
+	line := strings.Split(mustReadLine(), <span class="hljs-string">" "</span>)
+	assert(<span class="hljs-built_in">len</span>(line) == M)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; M; i++ {
+		ps, err := strconv.ParseUint(line[i], <span class="hljs-number">10</span>, <span class="hljs-number">32</span>)
+		<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+			<span class="hljs-built_in">panic</span>(err)
+		}
+		metals[i].hasAmount = <span class="hljs-keyword">uint</span>(ps)
+		totalSupply += metals[i].hasAmount
+	}
+
+	<span class="hljs-keyword">var</span> l, r <span class="hljs-keyword">uint</span>
+	r = totalSupply + <span class="hljs-number">1</span>
+	<span class="hljs-keyword">for</span> r-l &gt; <span class="hljs-number">1</span> {
+		m := (l + r) / <span class="hljs-number">2</span>
+		<span class="hljs-keyword">if</span> check(m) {
+			l = m
+		} <span class="hljs-keyword">else</span> {
+			r = m
+		}
+	}
+	fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, l)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">check</span><span class="hljs-params">(m <span class="hljs-keyword">uint</span>)</span> <span class="hljs-title">bool</span></span> {
+	want := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-keyword">int</span>]<span class="hljs-keyword">uint</span>)
+	want[<span class="hljs-number">0</span>] = m
+	totalWanted := m
+	<span class="hljs-keyword">for</span> {
+		unsatisfied := <span class="hljs-number">-1</span>
+		<span class="hljs-keyword">for</span> want, amount := <span class="hljs-keyword">range</span> want {
+			<span class="hljs-keyword">if</span> metals[want].hasAmount &lt; amount {
+				unsatisfied = want
+				<span class="hljs-keyword">break</span>
+			}
+		}
+		<span class="hljs-keyword">if</span> unsatisfied == <span class="hljs-number">-1</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+		}
+		additionalWantedAmount := want[unsatisfied] - metals[unsatisfied].hasAmount
+		assert(additionalWantedAmount &gt; <span class="hljs-number">0</span>)
+		want[unsatisfied] = want[unsatisfied] - additionalWantedAmount
+		want[metals[unsatisfied].ing1] += additionalWantedAmount
+		want[metals[unsatisfied].ing2] += additionalWantedAmount
+		totalWanted += additionalWantedAmount
+		<span class="hljs-keyword">if</span> totalWanted &gt; totalSupply {
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+		}
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/3/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">3
+3
+2 3
+1 3
+1 2
+5 2 3
+5
+3 4
+3 4
+4 5
+3 5
+1 3
+0 8 6 2 4
+4
+3 4
+2 3
+2 3
+2 3
+0 1 1 0
+</code></pre><h2>Other files</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/small-2/problem.diff" target="_blank">small-2/problem.diff</a>:</div><a class="download" href="files/small-2/problem.diff" title="Download original" download="problem.diff">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2018-1B/3/small-2/problem.diff" target="_blank">open on GitHub</a></div><pre><code class="hljs diff"><span class="hljs-comment">--- wrong-1/cmd.go      2019-05-04 10:14:06.360786578 +0800</span>
+<span class="hljs-comment">+++ cmd.go      2019-05-04 10:12:48.562777456 +0800</span>
+<span class="hljs-meta">@@ -92,18 +92,23 @@</span>
+                }
+                if produceAmount == 0 {
+                        for _, mtLacking := range limitingMetals {
+<span class="hljs-deletion">-                               requiredAmount := recipe[mtLacking]</span>
+<span class="hljs-deletion">-                               delete(recipe, mtLacking)</span>
+                                metalLacking := metals[mtLacking]
+<span class="hljs-addition">+                               hasAmount := metalLacking.hasAmount</span>
+<span class="hljs-addition">+                               additionalRequiredAmount := recipe[mtLacking] - hasAmount</span>
+<span class="hljs-addition">+                               if hasAmount == 0 {</span>
+<span class="hljs-addition">+                                       delete(recipe, mtLacking)</span>
+<span class="hljs-addition">+                               } else {</span>
+<span class="hljs-addition">+                                       recipe[mtLacking] = hasAmount</span>
+<span class="hljs-addition">+                               }</span>
+                                if metalLacking.ing1 == mtLacking {
+                                        break a
+                                } else {
+<span class="hljs-deletion">-                                       recipe[metalLacking.ing1] += requiredAmount</span>
+<span class="hljs-addition">+                                       recipe[metalLacking.ing1] += additionalRequiredAmount</span>
+                                }
+                                if metalLacking.ing2 == mtLacking {
+                                        break a
+                                } else {
+<span class="hljs-deletion">-                                       recipe[metalLacking.ing2] += requiredAmount</span>
+<span class="hljs-addition">+                                       recipe[metalLacking.ing2] += additionalRequiredAmount</span>
+                                }
+                        }
+                } else {
+</code></pre></body></html>

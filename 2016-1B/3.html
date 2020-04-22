@@ -1,0 +1,308 @@
+<!DOCTYPE html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../commons/style.css"><script src="../commons/general.js" async></script><title>2016-1B Problem C - Mao's Google Code Jam practice files</title><link rel="stylesheet" href="../commons/hljs.css"></head><body><a class="toroot" href="..">Return to problem list</a><h1>2016-1B Problem C</h1><h2>Final solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/main.rs" target="_blank">main.rs</a>:</div><a class="download" href="files/main.rs" title="Download original" download="main.rs">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1B/3/main.rs" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-keyword">use</span> std::collections::HashSet;
+<span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">bipartite_match</span></span>(m: <span class="hljs-built_in">usize</span>, n: <span class="hljs-built_in">usize</span>, connections: &amp;[(<span class="hljs-built_in">usize</span>, <span class="hljs-built_in">usize</span>)]) -&gt; HashSet&lt;(<span class="hljs-built_in">usize</span>, <span class="hljs-built_in">usize</span>)&gt; {
+	<span class="hljs-built_in">debug_assert!</span>(connections.iter().collect::&lt;HashSet&lt;_&gt;&gt;().len() == connections.len());
+
+	<span class="hljs-meta">#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]</span>
+	<span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">Node</span></span> {
+		Left(<span class="hljs-built_in">usize</span>),
+		Right(<span class="hljs-built_in">usize</span>)
+	}
+
+	<span class="hljs-keyword">impl</span> Node {
+		<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">is_left</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">bool</span> {
+			<span class="hljs-keyword">if</span> <span class="hljs-keyword">let</span> Node::Left(_) = <span class="hljs-keyword">self</span> {
+				<span class="hljs-literal">true</span>
+			} <span class="hljs-keyword">else</span> {
+				<span class="hljs-literal">false</span>
+			}
+		}
+
+		<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">is_right</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">bool</span> {
+			<span class="hljs-keyword">if</span> <span class="hljs-keyword">let</span> Node::Right(_) = <span class="hljs-keyword">self</span> {
+				<span class="hljs-literal">true</span>
+			} <span class="hljs-keyword">else</span> {
+				<span class="hljs-literal">false</span>
+			}
+		}
+
+		<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">index</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">usize</span> {
+			<span class="hljs-keyword">match</span> <span class="hljs-keyword">self</span> {
+				Node::Left(<span class="hljs-keyword">ref</span> n) =&gt; *n,
+				Node::Right(<span class="hljs-keyword">ref</span> n) =&gt; *n
+			}
+		}
+	}
+
+	<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> ltor = <span class="hljs-built_in">vec!</span>[<span class="hljs-built_in">Vec</span>::new(); m];
+	<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> rtol = <span class="hljs-built_in">vec!</span>[<span class="hljs-built_in">Vec</span>::new(); n];
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">ref</span> l, <span class="hljs-keyword">ref</span> r) <span class="hljs-keyword">in</span> connections.iter() {
+		<span class="hljs-keyword">let</span> l = *l;
+		<span class="hljs-keyword">let</span> r = *r;
+		<span class="hljs-keyword">if</span> l &gt;= m || r &gt;= n {
+			<span class="hljs-built_in">panic!</span>(<span class="hljs-string">"invalid input."</span>);
+		}
+
+		ltor[l].push(r);
+		rtol[r].push(l);
+	}
+
+	<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> current_matches: HashSet&lt;(<span class="hljs-built_in">usize</span>, <span class="hljs-built_in">usize</span>)&gt; = HashSet::new();
+
+	<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">aug_can_go</span></span>(from: &amp;Node, to: &amp;Node, current_matches: &amp;HashSet&lt;(<span class="hljs-built_in">usize</span>, <span class="hljs-built_in">usize</span>)&gt;) -&gt; <span class="hljs-built_in">bool</span> {
+		<span class="hljs-keyword">if</span> from.is_left() &amp;&amp; to.is_right() {
+			!current_matches.contains(&amp;(from.index(), to.index()))
+		} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> from.is_right() &amp;&amp; to.is_left() {
+			current_matches.contains(&amp;(to.index(), from.index()))
+		} <span class="hljs-keyword">else</span> {
+			<span class="hljs-built_in">unreachable!</span>()
+		}
+	}
+
+	<span class="hljs-keyword">loop</span> {
+		<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> l_matched: <span class="hljs-built_in">Vec</span>&lt;<span class="hljs-built_in">bool</span>&gt; = <span class="hljs-built_in">vec!</span>[<span class="hljs-literal">false</span>; m];
+		<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> r_matched: <span class="hljs-built_in">Vec</span>&lt;<span class="hljs-built_in">bool</span>&gt; = <span class="hljs-built_in">vec!</span>[<span class="hljs-literal">false</span>; n];
+		<span class="hljs-keyword">for</span> (<span class="hljs-keyword">ref</span> i, <span class="hljs-keyword">ref</span> j) <span class="hljs-keyword">in</span> current_matches.iter() {
+			l_matched[*i] = <span class="hljs-literal">true</span>;
+			r_matched[*j] = <span class="hljs-literal">true</span>;
+		}
+		<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">dfs</span></span>(
+			n: Node,
+			ltor: &amp;[<span class="hljs-built_in">Vec</span>&lt;<span class="hljs-built_in">usize</span>&gt;], rtol: &amp;[<span class="hljs-built_in">Vec</span>&lt;<span class="hljs-built_in">usize</span>&gt;],
+			current_match: &amp;HashSet&lt;(<span class="hljs-built_in">usize</span>, <span class="hljs-built_in">usize</span>)&gt;,
+			r_matched: &amp;[<span class="hljs-built_in">bool</span>],
+			visited: &amp;<span class="hljs-keyword">mut</span> HashSet&lt;Node&gt;
+		) -&gt; <span class="hljs-built_in">Option</span>&lt;<span class="hljs-built_in">Vec</span>&lt;Node&gt;&gt; {
+			<span class="hljs-built_in">assert!</span>(visited.insert(n));
+			<span class="hljs-keyword">if</span> n.is_right() &amp;&amp; !r_matched[n.index()] {
+				<span class="hljs-keyword">return</span> <span class="hljs-literal">Some</span>(<span class="hljs-built_in">vec!</span>[n]);
+			}
+			<span class="hljs-keyword">let</span> next_hops: <span class="hljs-built_in">Vec</span>&lt;Node&gt; = <span class="hljs-keyword">match</span> n {
+				Node::Left(i) =&gt; ltor[i].iter().map(|j| Node::Right(*j)).collect(),
+				Node::Right(i) =&gt; rtol[i].iter().map(|j| Node::Left(*j)).collect(),
+			};
+			<span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> next_hops {
+				<span class="hljs-keyword">if</span> aug_can_go(&amp;n, &amp;j, current_match) &amp;&amp; !visited.contains(&amp;j) {
+					<span class="hljs-keyword">if</span> <span class="hljs-keyword">let</span> <span class="hljs-literal">Some</span>(<span class="hljs-keyword">mut</span> path) = dfs(j, ltor, rtol, current_match, r_matched, visited) {
+						path.push(n);
+						<span class="hljs-keyword">return</span> <span class="hljs-literal">Some</span>(path);
+					}
+				}
+			}
+			<span class="hljs-literal">None</span>
+		}
+		<span class="hljs-keyword">let</span> dfs_path = (<span class="hljs-number">0</span>..m).into_iter()
+			.filter(|i| !l_matched[*i])
+			.map(|i| dfs(Node::Left(i), &amp;ltor, &amp;rtol, &amp;current_matches, &amp;r_matched, &amp;<span class="hljs-keyword">mut</span> HashSet::new()))
+			.find(|x| x.is_some()).flatten();
+		<span class="hljs-keyword">if</span> <span class="hljs-keyword">let</span> <span class="hljs-literal">Some</span>(<span class="hljs-keyword">mut</span> path) = dfs_path {
+			path.reverse();
+			<span class="hljs-built_in">debug_assert!</span>(path.len() &gt;= <span class="hljs-number">2</span>);
+			<span class="hljs-keyword">for</span> w <span class="hljs-keyword">in</span> path.windows(<span class="hljs-number">2</span>) {
+				<span class="hljs-keyword">let</span> (i, j) = (w[<span class="hljs-number">0</span>], w[<span class="hljs-number">1</span>]);
+				<span class="hljs-keyword">match</span> i {
+					Node::Left(i) =&gt; {
+						<span class="hljs-built_in">debug_assert!</span>(j.is_right());
+						current_matches.insert((i, j.index()));
+					},
+					Node::Right(i) =&gt; {
+						<span class="hljs-built_in">debug_assert!</span>(j.is_left());
+						<span class="hljs-built_in">assert!</span>(current_matches.remove(&amp;(j.index(), i)));
+					}
+				}
+			}
+		} <span class="hljs-keyword">else</span> {
+			<span class="hljs-keyword">break</span>;
+		}
+	}
+
+	current_matches
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">test</span></span>() -&gt; <span class="hljs-built_in">usize</span> {
+	<span class="hljs-keyword">let</span> n: <span class="hljs-built_in">usize</span> = read_ints()[<span class="hljs-number">0</span>];
+	<span class="hljs-keyword">use</span> std::collections::HashMap;
+	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">WordToId</span></span> {
+		next: <span class="hljs-built_in">usize</span>,
+		hm: HashMap&lt;<span class="hljs-built_in">usize</span>, <span class="hljs-built_in">String</span>&gt;,
+		rev: HashMap&lt;<span class="hljs-built_in">String</span>, <span class="hljs-built_in">usize</span>&gt;,
+	}
+	<span class="hljs-keyword">impl</span> WordToId {
+		<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">with_capacity</span></span>(cap: <span class="hljs-built_in">usize</span>) -&gt; <span class="hljs-keyword">Self</span> {
+			WordToId {
+				next: <span class="hljs-number">0</span>,
+				hm: HashMap::with_capacity(cap),
+				rev: HashMap::with_capacity(cap)
+			}
+		}
+		<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">insert</span></span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>, w: <span class="hljs-built_in">String</span>) -&gt; <span class="hljs-built_in">usize</span> {
+			<span class="hljs-keyword">if</span> <span class="hljs-keyword">self</span>.rev.contains_key(&amp;w) {
+				*<span class="hljs-keyword">self</span>.rev.get(&amp;w).unwrap()
+			} <span class="hljs-keyword">else</span> {
+				<span class="hljs-keyword">let</span> id = <span class="hljs-keyword">self</span>.next;
+				<span class="hljs-keyword">self</span>.next += <span class="hljs-number">1</span>;
+				<span class="hljs-keyword">self</span>.hm.insert(id, w.clone());
+				<span class="hljs-keyword">self</span>.rev.insert(w, id);
+				id
+			}
+		}
+		<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">len</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">usize</span> {
+			<span class="hljs-keyword">self</span>.next
+		}
+	}
+	<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> left = WordToId::with_capacity(n);
+	<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> right = WordToId::with_capacity(n);
+	<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> edges: HashSet&lt;(<span class="hljs-built_in">usize</span>, <span class="hljs-built_in">usize</span>)&gt; = HashSet::with_capacity(n);
+	<span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-number">0</span>..n {
+		<span class="hljs-keyword">let</span> l = read_line();
+		<span class="hljs-keyword">let</span> parts: <span class="hljs-built_in">Vec</span>&lt;&amp;<span class="hljs-built_in">str</span>&gt; = l.split(<span class="hljs-string">' '</span>).collect();
+		<span class="hljs-built_in">assert_eq!</span>(parts.len(), <span class="hljs-number">2</span>);
+		<span class="hljs-keyword">let</span> w = (left.insert(parts[<span class="hljs-number">0</span>].to_owned()), right.insert(parts[<span class="hljs-number">1</span>].to_owned()));
+		edges.insert(w);
+	}
+	<span class="hljs-keyword">let</span> base_set = bipartite_match(left.len(), right.len(), &amp;edges.iter().copied().collect::&lt;<span class="hljs-built_in">Vec</span>&lt;_&gt;&gt;());
+	<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> left_used: <span class="hljs-built_in">Vec</span>&lt;<span class="hljs-built_in">bool</span>&gt; = <span class="hljs-built_in">vec!</span>[<span class="hljs-literal">false</span>; left.len()];
+	<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> right_used: <span class="hljs-built_in">Vec</span>&lt;<span class="hljs-built_in">bool</span>&gt; = <span class="hljs-built_in">vec!</span>[<span class="hljs-literal">false</span>; right.len()];
+	<span class="hljs-keyword">for</span> w <span class="hljs-keyword">in</span> base_set.iter().copied() {
+		left_used[w.<span class="hljs-number">0</span>] = <span class="hljs-literal">true</span>;
+		right_used[w.<span class="hljs-number">1</span>] = <span class="hljs-literal">true</span>;
+	}
+	<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> nb_not_faked = base_set.len();
+	<span class="hljs-keyword">for</span> w <span class="hljs-keyword">in</span> edges {
+		<span class="hljs-keyword">if</span> base_set.contains(&amp;w) {
+			<span class="hljs-keyword">continue</span>;
+		}
+		<span class="hljs-keyword">if</span> left_used[w.<span class="hljs-number">0</span>] &amp;&amp; right_used[w.<span class="hljs-number">1</span>] {
+			<span class="hljs-keyword">continue</span>;
+		}
+		nb_not_faked += <span class="hljs-number">1</span>;
+		left_used[w.<span class="hljs-number">0</span>] = <span class="hljs-literal">true</span>;
+		right_used[w.<span class="hljs-number">1</span>] = <span class="hljs-literal">true</span>;
+	}
+	n - nb_not_faked
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+	<span class="hljs-keyword">let</span> t: <span class="hljs-built_in">usize</span> = read_ints()[<span class="hljs-number">0</span>];
+	<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">1</span>..=t {
+		<span class="hljs-built_in">println!</span>(<span class="hljs-string">"Case #{}: {}"</span>, i, test());
+	}
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><h2>Wrong solution</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/wrong/cmd.go" target="_blank">wrong/cmd.go</a>:</div><a class="download" href="files/wrong/cmd.go" title="Download original" download="cmd.go">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1B/3/wrong/cmd.go" target="_blank">open on GitHub</a></div><pre><code class="hljs"><span class="hljs-comment">// package, import, etc...</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span> {
+  <span class="hljs-comment">// read T, repeat test() T times...</span>
+}
+
+<span class="hljs-keyword">type</span> Topic <span class="hljs-keyword">struct</span> {
+	left, right <span class="hljs-keyword">string</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> {
+	<span class="hljs-keyword">var</span> N <span class="hljs-keyword">int</span>
+	mustReadLineOfInts(&amp;N)
+	topics := <span class="hljs-built_in">make</span>([]Topic, <span class="hljs-number">0</span>)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; N; i++ {
+		line := strings.Split(mustReadLine(), <span class="hljs-string">" "</span>)
+		assert(<span class="hljs-built_in">len</span>(line) == <span class="hljs-number">2</span>)
+		topics = <span class="hljs-built_in">append</span>(topics, Topic{line[<span class="hljs-number">0</span>], line[<span class="hljs-number">1</span>]})
+	}
+	count := <span class="hljs-number">0</span>
+	leftMap := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-keyword">string</span>]<span class="hljs-keyword">int</span>)
+	rightMap := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-keyword">string</span>]<span class="hljs-keyword">int</span>)
+	<span class="hljs-keyword">for</span> i, t := <span class="hljs-keyword">range</span> topics {
+		<span class="hljs-keyword">if</span> _, exist := leftMap[t.left]; exist {
+			<span class="hljs-keyword">continue</span>
+		}
+		<span class="hljs-keyword">if</span> _, seen := rightMap[t.right]; seen {
+			<span class="hljs-keyword">continue</span>
+		}
+		leftMap[t.left] = i
+		rightMap[t.right] = i
+		debug(fmt.Sprintf(<span class="hljs-string">"%v"</span>, t))
+		count++
+	}
+	<span class="hljs-comment">// The following 16 lines of code is wrong. This is because although the topic added in each loop will not be fake *at</span>
+	<span class="hljs-comment">// that time*, it can cause previous topics to become fake. I think my mistake is that I thought of the relationship of</span>
+	<span class="hljs-comment">// "faked from" is undirected: if the new topic can't be faked from previous topics, previous topics can't be faked</span>
+	<span class="hljs-comment">// from the new topic. This is not true because "faked from" is a 1-to-2 relationship.</span>
+	<span class="hljs-keyword">for</span> i, t := <span class="hljs-keyword">range</span> topics {
+		<span class="hljs-keyword">if</span> _, exist := rightMap[t.right]; exist {
+			<span class="hljs-keyword">continue</span>
+		}
+		debug(fmt.Sprintf(<span class="hljs-string">"%v"</span>, t))
+		rightMap[t.right] = i
+		count++
+	}
+	<span class="hljs-keyword">for</span> i, t := <span class="hljs-keyword">range</span> topics {
+		<span class="hljs-keyword">if</span> _, exist := leftMap[t.left]; exist {
+			<span class="hljs-keyword">continue</span>
+		}
+		debug(fmt.Sprintf(<span class="hljs-string">"%v"</span>, t))
+		leftMap[t.left] = i
+		count++
+	}
+	fmt.Fprintf(stdout, <span class="hljs-string">"%d\n"</span>, N-count)
+}
+
+<span class="hljs-comment">// boilerplate omitted...</span></code></pre><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/wrong/problem.in" target="_blank">wrong/problem.in</a>:</div><a class="download" href="files/wrong/problem.in" title="Download original" download="problem.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1B/3/wrong/problem.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">1
+3
+A B
+A C
+C B
+</code></pre><h4>Expected output</h4><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/wrong/problem.out" target="_blank">wrong/problem.out</a>:</div><a class="download" href="files/wrong/problem.out" title="Download original" download="problem.out">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1B/3/wrong/problem.out" target="_blank">open on GitHub</a></div><pre><code class="hljs">Case #1: 1
+</code></pre><h2>Sample test cases given in question</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sample.in" target="_blank">sample.in</a>:</div><a class="download" href="files/sample.in" title="Download original" download="sample.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1B/3/sample.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">3
+3
+HYDROCARBON COMBUSTION
+QUAIL BEHAVIOR
+QUAIL COMBUSTION
+3
+CODE JAM
+SPACE JAM
+PEARL JAM
+2
+INTERGALACTIC PLANETARY
+PLANETARY INTERGALACTIC</code></pre><h2>Other files</h2><div class="filehead"><div class="fnamecontain"><a class="fname" href="files/sketch.in" target="_blank">sketch.in</a>:</div><a class="download" href="files/sketch.in" title="Download original" download="sketch.in">save</a>&nbsp;&nbsp;&nbsp;<a class="openongithub" href="https://github.com/micromaomao/google-code-jam/blob/master/2016-1B/3/sketch.in" target="_blank">open on GitHub</a></div><pre><code class="hljs">5
+4
+A B
+A C
+D C
+D B
+9
+A B
+D B
+A C
+D C
+D F
+D E
+A E
+A F
+B F
+9
+D E
+A B
+D B
+A C
+D C
+D F
+A E
+A F
+B F
+3
+H C
+Q C
+Q B
+12
+A B
+D B
+A C
+D C
+D F
+D E
+A E
+A F
+B F
+F C
+K G
+D G
+</code></pre></body></html>
