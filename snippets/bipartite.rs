@@ -10,7 +10,7 @@ pub fn bipartite_match(m: usize, n: usize, connections: &[(usize, usize)]) -> Ha
 
 	impl Node {
 		fn is_left(&self) -> bool {
-			if let Node::Left(_) = self {
+			if let &Node::Left(_) = self {
 				true
 			} else {
 				false
@@ -18,7 +18,7 @@ pub fn bipartite_match(m: usize, n: usize, connections: &[(usize, usize)]) -> Ha
 		}
 
 		fn is_right(&self) -> bool {
-			if let Node::Right(_) = self {
+			if let &Node::Right(_) = self {
 				true
 			} else {
 				false
@@ -26,18 +26,16 @@ pub fn bipartite_match(m: usize, n: usize, connections: &[(usize, usize)]) -> Ha
 		}
 
 		fn index(&self) -> usize {
-			match self {
-				Node::Left(ref n) => *n,
-				Node::Right(ref n) => *n
+			match *self {
+				Node::Left(n) => n,
+				Node::Right(n) => n
 			}
 		}
 	}
 
 	let mut ltor = vec![Vec::new(); m];
 	let mut rtol = vec![Vec::new(); n];
-	for (ref l, ref r) in connections.iter() {
-		let l = *l;
-		let r = *r;
+	for &(l, r) in connections.iter() {
 		if l >= m || r >= n {
 			panic!("invalid input.");
 		}
@@ -61,9 +59,9 @@ pub fn bipartite_match(m: usize, n: usize, connections: &[(usize, usize)]) -> Ha
 	loop {
 		let mut l_matched: Vec<bool> = vec![false; m];
 		let mut r_matched: Vec<bool> = vec![false; n];
-		for (ref i, ref j) in current_matches.iter() {
-			l_matched[*i] = true;
-			r_matched[*j] = true;
+		for &(i, j) in current_matches.iter() {
+			l_matched[i] = true;
+			r_matched[j] = true;
 		}
 		fn dfs(
 			n: Node,
@@ -93,7 +91,7 @@ pub fn bipartite_match(m: usize, n: usize, connections: &[(usize, usize)]) -> Ha
 		let dfs_path = (0..m).into_iter()
 			.filter(|i| !l_matched[*i])
 			.map(|i| dfs(Node::Left(i), &ltor, &rtol, &current_matches, &r_matched, &mut HashSet::new()))
-			.find(|x| x.is_some()).flatten();
+			.find(|x| x.is_some()).map(|x| x.unwrap());
 		if let Some(mut path) = dfs_path {
 			path.reverse();
 			debug_assert!(path.len() >= 2);
